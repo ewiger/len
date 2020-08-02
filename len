@@ -2,11 +2,13 @@
 """
 len is a recipe language for lazy meta programming
 """
-from l.cfg.logger import get_config
-from l.log.logger import get_logger
-from l.cli.parser import get_parser
-from l.cli.app import CliApp
+from l.basic.log.logger import get_logger
+from l.basic.cfg import get_config
+from l.basic.cli.parser import get_parser
+from l.basic.cli.app import CliApp
 
+
+print(__module__)
 
 logger = get_logger()
 config = get_config()
