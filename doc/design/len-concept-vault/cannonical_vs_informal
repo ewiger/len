@@ -1,0 +1,411 @@
+When designing **len**, the key design question is not *what surface syntax humans prefer*, but **what the canonical internal representation is**. Informal syntax can always be supported through sugar and normalization, but the **canonical form determines the semantics, tooling, and compiler design**.
+
+Below is a structured expansion of the issue.
+
+---
+
+# 1. Surface Syntax vs Canonical Form
+
+A specification language typically has **three layers**:
+
+| Layer              | Purpose                        | Example                               |
+| ------------------ | ------------------------------ | ------------------------------------- |
+| Informal / Natural | human readability              | `every user must have a unique email` |
+| Sugared syntax     | structured but friendly        | `forall u in Users: unique(u.email)`  |
+| Canonical form     | strict semantic representation | `∀u:User. UniqueEmail(u)`             |
+
+The important rule:
+
+**Only the canonical form has semantics.
+Everything else normalizes into it.**
+
+So the design task is really:
+
+> **What is the canonical representation of len?**
+
+---
+
+# 2. The Main Candidate Styles
+
+We discussed several styles. They fall into three major families.
+
+## Option A — Mathematical / FOL syntax
+
+Example:
+
+```
+∀u ∈ Users. ∃e. Email(u,e) ∧ Unique(e)
+```
+
+or
+
+```
+∀x. P(x) → Q(x)
+```
+
+### Advantages
+
+* canonical in logic
+* extremely compact
+* precise semantics
+* compatible with theorem provers
+
+### Disadvantages
+
+* poor ergonomics for engineers
+* quantifier symbols unfamiliar
+* difficult to parse visually
+* difficult to extend with state semantics
+
+This style works well as a **target IR**, but poorly as the **primary writing format**.
+
+---
+
+## Option B — Programming-like quantifiers
+
+Example:
+
+```
+forall u in Users:
+    exists e:
+        Email(u,e) and Unique(e)
+```
+
+or
+
+```
+forall x in xs:
+    P(x) -> Q(x)
+```
+
+### Advantages
+
+* easier for programmers
+* looks like pseudocode
+* easier indentation structure
+* still maps directly to FOL
+
+### Disadvantages
+
+* ambiguity if grammar is not strict
+* slightly more verbose
+* still mostly predicate logic
+
+This is common in **verification DSLs**.
+
+Examples:
+
+* Dafny
+* TLA+
+* Alloy
+* specification sections in Rust / Ada SPARK
+
+---
+
+## Option C — Set-theory style
+
+Example:
+
+```
+∀u ∈ Users : unique(email(u))
+```
+
+or
+
+```
+{ x ∈ Users | Active(x) }
+```
+
+### Advantages
+
+* expressive for modeling domains
+* very close to mathematics
+* natural for relational semantics
+
+### Disadvantages
+
+* ambiguous operational meaning
+* not great for state transitions
+* set comprehension can become complex
+
+Works best when the language is **relational or model-based**.
+
+---
+
+# 3. A Fourth Option (Important)
+
+There is actually a **fourth structure**, which is what many successful specification languages use:
+
+## Relational / Predicate Clauses (Prolog-like)
+
+Example:
+
+```
+User(u)
+Email(u,e)
+Unique(e)
+```
+
+or
+
+```
+ActiveUser(u) :- User(u), not Suspended(u)
+```
+
+### Advantages
+
+* extremely simple core
+* relational semantics
+* easy normalization
+* easy compilation
+
+### Disadvantages
+
+* unfamiliar outside logic programming
+* sometimes verbose
+* needs extra structure for contracts
+
+But importantly:
+
+**this style maps directly to logical canonical forms.**
+
+---
+
+# 4. A Strong Design Principle
+
+A powerful architecture for **len** would be:
+
+```
+Human text
+   ↓
+Sugared len
+   ↓
+Normalized len
+   ↓
+Canonical relational form
+   ↓
+Backend targets
+```
+
+Example pipeline:
+
+```
+forall u in Users:
+    exists e:
+        Email(u,e)
+```
+
+normalize →
+
+```
+∀u:User. ∃e:Email. Email(u,e)
+```
+
+canonical relational form →
+
+```
+User(u)
+Email(u,e)
+```
+
+---
+
+# 5. What the Canonical Form Should Probably Be
+
+For len, the most stable canonical representation is likely:
+
+### **Many-sorted relational first-order logic**
+
+Meaning:
+
+```
+Predicate(term1, term2, ...)
+```
+
+plus
+
+```
+∀
+∃
+∧
+∨
+¬
+→
+```
+
+with **explicit sorts**.
+
+Example canonical representation:
+
+```
+forall u:User
+    exists e:Email
+        EmailOf(u,e)
+```
+
+or normalized:
+
+```
+∀u:User ∃e:Email EmailOf(u,e)
+```
+
+This gives:
+
+* formal semantics
+* normalizable structure
+* compatibility with theorem provers
+* compatibility with code generators
+
+---
+
+# 6. What Humans Should Write
+
+Humans should **not** write the canonical form directly.
+
+Instead they write something like:
+
+```
+forall user in Users:
+    user.email must be unique
+```
+
+or
+
+```
+require:
+    forall u in Users:
+        unique(email(u))
+```
+
+Which normalizes to:
+
+```
+∀u:User ∀v:User
+    email(u) = email(v) -> u = v
+```
+
+---
+
+# 7. Why This Matters for the Compiler
+
+If the canonical form is relational logic, then the **len toolchain becomes simple**:
+
+### Parser
+
+converts sugar → normalized syntax
+
+### Normalizer
+
+converts normalized syntax → canonical logical form
+
+### Validator
+
+checks:
+
+* type correctness
+* quantifier scope
+* logical well-formedness
+
+### Backends
+
+compile canonical form to:
+
+* Lean
+* SMT-LIB
+* Prolog
+* test generators
+* code stubs
+
+---
+
+# 8. A Concrete Example
+
+Human spec:
+
+```
+section UserEmails
+
+forall user in Users:
+    exists email:
+        EmailOf(user,email)
+
+constraint:
+    email must be unique
+```
+
+Normalized len:
+
+```
+forall u:User
+    exists e:Email
+        EmailOf(u,e)
+
+forall u1,u2,e
+    EmailOf(u1,e) and EmailOf(u2,e)
+        -> u1 = u2
+```
+
+Canonical logical form:
+
+```
+∀u:User ∃e:Email EmailOf(u,e)
+
+∀u1,u2,e
+    (EmailOf(u1,e) ∧ EmailOf(u2,e)) → u1 = u2
+```
+
+---
+
+# 9. The Likely Best Choice
+
+A strong design decision would be:
+
+### Human syntax
+
+```
+forall x in xs
+exists y
+```
+
+### Canonical form
+
+```
+∀x:Type
+∃y:Type
+Predicate(...)
+```
+
+### Core representation
+
+```
+Predicate(term,...)
+```
+
+with logical connectives.
+
+This gives:
+
+* readability
+* normalization
+* formal semantics
+* tool compatibility
+
+---
+
+# 10. A Guiding Rule for len
+
+A useful guiding rule:
+
+> **len must look informal to humans but compile into strict relational logic.**
+
+So:
+
+```
+human-friendly syntax
+    ↓
+logical canonical form
+```
+
+---
+
+If you'd like, the **next important step** would be defining the **minimal canonical grammar of len** (about ~10 constructs). That decision will heavily influence how easy it is to implement **`len normalize` and `len validate` in Go**, which you asked earlier.

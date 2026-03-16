@@ -1,0 +1,521 @@
+NOTE (2026-03-16): The canonical v0 “basic grammar” spec for `len validate` / `len normalize` now lives in `doc/design/len-concept-vault/len_cli`.
+This file remains as background discussion about implementation strategy.
+
+Not very difficult for a **first useful version**.
+Quite difficult for a **fully rigorous version**.
+
+The good news is that `len normalize` and `len validate` are exactly the kind of tools that can be built incrementally.
+
+## What those commands really mean
+
+Given the grammar we discussed, these two commands are roughly:
+
+`len normalize`
+
+* parse source text into AST
+* desugar syntactic sugar
+* resolve names
+* maybe infer some omitted types
+* rewrite into canonical core form
+* print canonical `len` back out
+
+`len validate`
+
+* parse source
+* check grammar
+* check names and declarations
+* check arities of predicates/functions
+* check sorts/types
+* check binder scoping
+* check that a `spec` body is well-formed
+* possibly warn about unresolved `open` parts or ambiguous constructs
+
+So this is mainly a **compiler frontend** problem, not yet a theorem prover problem.
+
+---
+
+## Difficulty in Go
+
+For a minimal but solid implementation in Go, difficulty is moderate.
+
+A realistic split:
+
+### Easy
+
+* CLI commands with Cobra or plain `flag`
+* lexer
+* parser for the minimal grammar
+* AST types
+* pretty-printer
+* basic validation
+* normalization as syntactic rewriting
+
+### Medium
+
+* type checking with generics like `List<T>`
+* name resolution across files/modules
+* decent error messages with source spans
+* canonical printing
+* sugared syntax that lowers into a core language
+
+### Hard
+
+* semantic equivalence checking
+* compilation to Lean in a principled way
+* inference strong enough to recover lots of omitted info
+* proof obligations and solver integration
+* incremental interactive editing support
+
+So if your question is:
+
+> can I build `len normalize` and `len validate` in Go?
+
+Yes, absolutely.
+
+If your question is:
+
+> can I build the full semantic infrastructure in Go?
+
+Yes, but that becomes a larger language-tooling project.
+
+---
+
+## Why Go is a reasonable choice
+
+Go is good for this if you want:
+
+* simple deployment
+* fast CLI tools
+* easy distribution as one binary
+* clear code structure
+* practical engineering over type-system sophistication
+
+For `len`, Go is especially good if your near-term goal is:
+
+* build a parser
+* normalize to canonical IR
+* validate specs
+* maybe compile to JSON / Lean / SMT-LIB later
+
+Go is less ideal if you want the implementation language itself to help you express complicated compiler invariants.
+
+---
+
+## Rough architecture in Go
+
+A clean architecture would be:
+
+```text
+cmd/len/
+    main.go
+
+internal/lexer/
+internal/parser/
+internal/ast/
+internal/types/
+internal/validate/
+internal/normalize/
+internal/pretty/
+internal/lower/
+internal/diagnostics/
+```
+
+And the pipeline:
+
+```text
+source text
+  -> lexer
+  -> parser
+  -> AST
+  -> validation
+  -> normalization
+  -> pretty-print canonical form
+```
+
+---
+
+## Minimal AST you would need
+
+Something like:
+
+```go
+type Program struct {
+    Decls []Decl
+}
+
+type Decl interface {
+    declNode()
+}
+
+type TypeDecl struct {
+    Name string
+}
+
+type RelDecl struct {
+    Name   string
+    Params []Param
+}
+
+type FnDecl struct {
+    Name   string
+    Params []Param
+    Return TypeExpr
+}
+
+type DefDecl struct {
+    Name   string
+    Params []Param
+    Body   Formula
+}
+
+type SpecDecl struct {
+    Name   string
+    Params []Param
+    Result Param
+    Clauses []Clause
+}
+```
+
+Then formulas:
+
+```go
+type Formula interface {
+    formulaNode()
+}
+
+type PredApp struct {
+    Name string
+    Args []Term
+}
+
+type BinaryFormula struct {
+    Op    BinaryOp
+    Left  Formula
+    Right Formula
+}
+
+type QuantifiedFormula struct {
+    Quantifier Quantifier
+    Binder     Binder
+    Body       Formula
+}
+```
+
+And terms/types similarly.
+
+This is all straightforward in Go.
+
+---
+
+## What normalization should do first
+
+Keep it simple.
+
+For version 1, normalization can just:
+
+* convert sugar like `x in xs` into `Member(x, xs)`
+* convert controlled NL forms into canonical predicates
+* flatten associative operators where useful
+* standardize binder formatting
+* standardize whitespace/order of clauses
+* maybe alpha-rename bound vars for consistent output
+
+Example:
+
+Input:
+
+```text
+spec min(xs: List<Int>) -> result: Int
+requires xs is non-empty
+ensures result in xs
+ensures for every y in xs, result <= y
+```
+
+Normalized output:
+
+```text
+spec min(xs: List<Int>) -> result: Int
+requires NonEmpty(xs)
+ensures Member(result, xs)
+ensures forall y in xs . result <= y
+```
+
+That alone already gives real value.
+
+---
+
+## What validation should do first
+
+For version 1, validate these:
+
+### Syntax validity
+
+Can it parse?
+
+### Declaration validity
+
+No duplicate declarations in the same scope.
+
+### Name resolution
+
+Every referenced symbol exists.
+
+### Arity checking
+
+`Member(x, xs)` has 2 args, not 1 or 3.
+
+### Sort/type checking
+
+If `Member(x, xs)` then `xs` must be a collection of elements compatible with `x`.
+
+### Binder checking
+
+`forall y in xs . ...` binds `y` only inside body.
+
+### Spec rules
+
+`requires` and `ensures` clauses contain formulas, not raw terms.
+
+That is enough for a serious MVP.
+
+---
+
+## Suggested implementation strategy
+
+Do **not** start with the full sugared language.
+
+Start with a tiny core:
+
+* `type`
+* `rel`
+* `fn`
+* `define`
+* `spec`
+* `requires`
+* `ensures`
+* formulas with `and`, `or`, `not`, `->`
+* `forall`, `exists`
+* `x in xs`
+* simple type expressions like `Int`, `List<Int>`
+
+Then later add:
+
+* controlled natural syntax
+* `open`
+* notes/provenance
+* modules/imports
+* compilation targets
+
+That keeps the first parser manageable.
+
+---
+
+## Parser options in Go
+
+You have several reasonable approaches.
+
+### 1. Hand-written lexer + recursive descent parser
+
+This is what I would recommend.
+
+Why:
+
+* grammar is small
+* easy to control error messages
+* easy to evolve syntax
+* excellent for DSLs
+
+Best option for `len`.
+
+### 2. Parser generator
+
+Examples: ANTLR, pigeon, participle.
+
+Useful if:
+
+* you want grammar-first development
+* your grammar grows more complicated
+
+But for a young DSL, generators often slow iteration.
+
+### 3. PEG parser
+
+Good for compact grammars, but sometimes trickier when you want detailed control and diagnostics.
+
+For `len`, I would still lean hand-written.
+
+---
+
+## Is Go the best choice?
+
+Go is a good practical choice, but not the only one.
+
+### Best alternatives
+
+#### Rust
+
+Best if you want:
+
+* stronger guarantees
+* high performance
+* robust compiler-style tooling
+* cleaner modeling of ownership and invariants
+
+Downside:
+
+* slower iteration than Go
+* more implementation overhead
+
+Rust is probably the strongest systems-language alternative.
+
+#### OCaml
+
+Excellent for:
+
+* compilers
+* parsers
+* AST-heavy symbolic tools
+* elegant algebraic data types and pattern matching
+
+This is one of the most natural languages for implementing `len`.
+
+Downside:
+
+* smaller ecosystem for mainstream CLI distribution
+* less familiar to many engineers
+
+#### Haskell
+
+Very strong for:
+
+* symbolic languages
+* parsers
+* normalization
+* type-heavy designs
+
+But it may pull the project toward abstraction too early.
+
+#### TypeScript
+
+Good if:
+
+* you want web/editor integration quickly
+* language server/browser tooling matters
+* you want a fast prototype
+
+Less ideal for a core compiler if rigor and long-term performance matter.
+
+#### Python
+
+Great for prototyping semantics quickly.
+Not ideal as the final implementation for a robust language toolchain, though many projects still do it successfully.
+
+---
+
+## My practical recommendation
+
+For your use case, I would rank them like this:
+
+### If you want fastest serious implementation
+
+**Go**
+
+### If you want strongest long-term compiler architecture
+
+**Rust** or **OCaml**
+
+### If you want fastest experimental prototype
+
+**Python** or **TypeScript**
+
+So there is nothing wrong with Go here.
+In fact, for `len normalize` and `len validate`, Go is a very sensible choice.
+
+---
+
+## Estimated effort
+
+Very rough estimate for one experienced engineer:
+
+### MVP
+
+A parser + AST + normalize + validate for the minimal grammar:
+
+* a few days for rough prototype
+* 1 to 3 weeks for something clean and usable
+
+### Good tool
+
+With diagnostics, tests, canonical printing, modules, and decent type checking:
+
+* 1 to 3 months
+
+### Serious language platform
+
+With Lean/SMT lowering, LSP/editor support, semantic equivalence machinery:
+
+* several months to much longer
+
+So the first step is very feasible.
+
+---
+
+## A clean MVP scope
+
+A strong first release could be exactly:
+
+### `len validate file.len`
+
+* parse
+* resolve
+* type-check
+* print diagnostics
+* exit nonzero on error
+
+### `len normalize file.len`
+
+* parse
+* validate
+* desugar
+* canonicalize
+* print canonical `len`
+
+That already gives you a useful semantic frontend.
+
+---
+
+## One design decision that matters a lot
+
+Define **core len** first, and make normalization lower everything into it.
+
+So really you want:
+
+```text
+surface len  --parse-->
+AST          --normalize-->
+core len AST --validate-->
+pretty print or lower to targets
+```
+
+Or even:
+
+```text
+surface parse
+-> surface AST
+-> lower to core AST
+-> validate core AST
+-> print core form
+```
+
+This makes the language much easier to evolve.
+
+---
+
+## Bottom line
+
+Programming `len normalize` and `len validate` in Go is very doable and not unusually hard, provided you keep the first version small.
+
+The hard part is not the CLI or parser.
+The hard part is choosing a clean **core AST, normalization rules, and validation discipline**.
+
+If you pick a tight core language, Go is a strong implementation choice. If you want the most elegant compiler-construction experience, OCaml or Rust may fit even better.
