@@ -1,0 +1,7 @@
+Model a simple access control policy.
+
+Admins can read and write every document.
+Editors can write only documents in their project.
+Viewers can read only public documents.
+No one may delete an archived document.
+

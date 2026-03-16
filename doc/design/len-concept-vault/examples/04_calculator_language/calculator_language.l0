@@ -1,0 +1,7 @@
+Design a small calculator language.
+
+The language supports integer literals, add, subtract, multiply, and divide.
+Evaluation must produce one integer result for any valid expression.
+Division by zero is invalid.
+We also want unit tests: one expression should evaluate to seven, and one invalid program should be rejected.
+

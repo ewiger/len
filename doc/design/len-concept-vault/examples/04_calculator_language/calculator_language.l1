@@ -1,0 +1,25 @@
+type Expr
+type Int
+
+rel Literal(Expr)
+rel AddExpr(Expr, Expr, Expr)
+rel SubExpr(Expr, Expr, Expr)
+rel MulExpr(Expr, Expr, Expr)
+rel DivExpr(Expr, Expr, Expr)
+rel ValidExpr(Expr)
+rel Eval(Expr, Int)
+rel Reject(Expr)
+rel Zero(Int)
+
+spec calculator_eval(expr: Expr) -> value: Int
+requires ValidExpr(expr)
+ensures Eval(expr, value)
+
+spec divide_by_zero_rejected(expr: Expr) -> status: Int
+requires exists lhs: Expr, rhs: Expr, d: Int. DivExpr(expr, lhs, rhs) and Eval(rhs, d) and Zero(d)
+ensures Reject(expr)
+
+spec unit_test_add_mul(expr: Expr) -> value: Int
+requires ValidExpr(expr)
+requires Eval(expr, value)
+ensures value = 7

@@ -1,0 +1,20 @@
+type Int
+
+rel Even(Int)
+fn add(a: Int, b: Int) -> Int
+fn double(k: Int) -> Int
+
+define EvenDef(x: Int) := exists k: Int. x = double(k)
+
+spec even_plus_even(a: Int, b: Int) -> sum: Int
+requires Even(a)
+requires Even(b)
+ensures sum = add(a, b)
+ensures Even(sum)
+
+quasi:
+  choose ka such that a = double(ka)
+  choose kb such that b = double(kb)
+  let k := add(ka, kb)
+  show sum = double(k)
+

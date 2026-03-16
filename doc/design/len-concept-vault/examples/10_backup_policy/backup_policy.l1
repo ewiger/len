@@ -1,0 +1,19 @@
+type Dataset
+type Backup
+type Int
+
+rel Production(Dataset)
+rel Temporary(Dataset)
+rel DailyBackup(Dataset, Backup)
+rel Encrypted(Backup)
+rel RetentionDays(Backup, Int)
+rel Critical(Dataset)
+rel RestoreValidated(Dataset)
+
+spec backup_rules(ds: Dataset) -> b: Backup
+requires Production(ds)
+ensures DailyBackup(ds, b)
+ensures Encrypted(b)
+ensures exists days: Int. RetentionDays(b, days) and days >= 30
+ensures Critical(ds) -> RestoreValidated(ds)
+open TemporaryPolicy

@@ -1,0 +1,24 @@
+type Expr
+type Int
+
+rel Literal(Expr)
+rel AddExpr(Expr, Expr, Expr)
+rel SubExpr(Expr, Expr, Expr)
+rel MulExpr(Expr, Expr, Expr)
+rel DivExpr(Expr, Expr, Expr)
+rel ValidExpr(Expr)
+rel Eval(Expr, Int)
+rel Reject(Expr)
+rel Zero(Int)
+
+spec calculator_rules(expr: Expr) -> value: Int
+ensures forall e: Expr, v: Int. Eval(e, v) -> ValidExpr(e)
+ensures forall e: Expr, lhs: Expr, rhs: Expr, d: Int.
+    (DivExpr(e, lhs, rhs) and Eval(rhs, d) and Zero(d)) -> Reject(e)
+ensures forall e: Expr. Reject(e) -> not ValidExpr(e)
+
+spec calculator_test(expr: Expr) -> value: Int
+ensures ValidExpr(expr)
+ensures Eval(expr, value)
+ensures value = 7
+

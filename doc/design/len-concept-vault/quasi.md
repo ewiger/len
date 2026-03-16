@@ -1,0 +1,1 @@
+`quasi` is a code name for pseudo algorithms (almost) academic languages that helps to steer the code generation by AI

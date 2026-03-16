@@ -1,0 +1,23 @@
+type User
+type Document
+type Project
+
+rel Admin(User)
+rel Editor(User)
+rel Viewer(User)
+rel InProject(User, Project)
+rel DocInProject(Document, Project)
+rel PublicDoc(Document)
+rel Archived(Document)
+rel CanRead(User, Document)
+rel CanWrite(User, Document)
+rel CanDelete(User, Document)
+
+spec access_rules(u: User, d: Document) -> ok: Document
+ensures forall u: User, d: Document. Admin(u) -> CanRead(u, d)
+ensures forall u: User, d: Document. Admin(u) -> CanWrite(u, d)
+ensures forall u: User, d: Document. (Viewer(u) and PublicDoc(d)) -> CanRead(u, d)
+ensures forall u: User, d: Document, p: Project.
+    (Editor(u) and InProject(u, p) and DocInProject(d, p)) -> CanWrite(u, d)
+ensures forall u: User, d: Document. Archived(d) -> not CanDelete(u, d)
+

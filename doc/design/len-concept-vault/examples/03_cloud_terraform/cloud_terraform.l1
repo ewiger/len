@@ -1,0 +1,26 @@
+type Resource
+type Region
+type Label
+
+rel Requested(Resource)
+rel Validated(Resource)
+rel ApprovedRegion(Region)
+rel LocatedIn(Resource, Region)
+rel HasLabel(Resource, Label)
+rel PublicIngress(Resource)
+rel IsLoadBalancer(Resource)
+rel IsDatabase(Resource)
+rel IsApp(Resource)
+
+spec terraform_plan(db: Resource, app: Resource, lb: Resource) -> ok: Resource
+requires Requested(db)
+requires Requested(app)
+requires Requested(lb)
+requires IsDatabase(db)
+requires IsApp(app)
+requires IsLoadBalancer(lb)
+ensures exists region: Region. LocatedIn(app, region) and ApprovedRegion(region)
+ensures exists env: Label. HasLabel(db, env) and HasLabel(app, env)
+ensures PublicIngress(lb)
+ensures not PublicIngress(db)
+ensures forall r: Resource. Requested(r) -> Validated(r)

@@ -1,0 +1,7 @@
+Specify a request rate limiter.
+
+Each client has a request window.
+Within one window, the client may make at most one hundred requests.
+If the limit is exceeded, later requests in that window must be rejected.
+A new window resets the allowance.
+

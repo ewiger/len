@@ -1,0 +1,22 @@
+type Resource
+type Region
+type Label
+
+rel Requested(Resource)
+rel Validated(Resource)
+rel ApprovedRegion(Region)
+rel LocatedIn(Resource, Region)
+rel HasLabel(Resource, Label)
+rel PublicIngress(Resource)
+rel IsLoadBalancer(Resource)
+rel IsDatabase(Resource)
+rel IsApp(Resource)
+
+spec infra_policy(db: Resource, app: Resource, lb: Resource) -> ok: Resource
+ensures forall r: Resource, reg: Region.
+    (Requested(r) and LocatedIn(r, reg)) -> ApprovedRegion(reg)
+ensures forall d: Resource, a: Resource, env: Label.
+    (IsDatabase(d) and IsApp(a) and HasLabel(a, env)) -> HasLabel(d, env)
+ensures forall d: Resource. IsDatabase(d) -> not PublicIngress(d)
+ensures forall lb: Resource. IsLoadBalancer(lb) -> PublicIngress(lb)
+ensures forall r: Resource. Requested(r) -> Validated(r)

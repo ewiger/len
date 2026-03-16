@@ -1,0 +1,16 @@
+type Int
+
+rel Even(Int)
+fn add(a: Int, b: Int) -> Int
+fn double(k: Int) -> Int
+
+spec even_definition(x: Int) -> witness: Int
+ensures Even(x) <-> exists k: Int. x = double(k)
+
+spec even_sum_closed(a: Int, b: Int) -> sum: Int
+requires Even(a)
+requires Even(b)
+ensures sum = add(a, b)
+ensures exists k: Int. sum = double(k)
+ensures Even(sum)
+

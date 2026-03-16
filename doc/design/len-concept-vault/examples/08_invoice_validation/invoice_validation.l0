@@ -1,0 +1,8 @@
+Validate invoice totals.
+
+Every line item contributes an amount.
+The subtotal is the sum of line items.
+Tax is computed from the taxable subtotal and the configured rate.
+The grand total must equal subtotal plus tax.
+An invoice is valid only if all totals are internally consistent.
+

@@ -1,0 +1,7 @@
+Given an input list, produce an output list.
+
+The output must be sorted.
+The output must contain no duplicates.
+Every output element must come from the input.
+Every distinct input element must appear in the output exactly once.
+

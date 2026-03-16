@@ -1,0 +1,7 @@
+Schedule jobs onto workers.
+
+A job must be assigned to exactly one worker.
+A worker may run only jobs whose resource demand fits within capacity.
+Jobs with higher priority should be scheduled before lower priority jobs when both are ready.
+Failed jobs may be retried at most three times.
+
