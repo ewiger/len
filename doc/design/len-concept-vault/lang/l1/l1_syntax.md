@@ -141,7 +141,7 @@ must forall x: A. forall y1: B. forall y2: B.
 
 `l1` uses arrows in two different “worlds”, and they should not be confused:
 
-- **Logical implication** inside formulas uses `->` (and `<->` for iff).
+- **Logical implication** inside formulas uses `=>` (and `<=>` for iff).
 - **Mapping / function type notation** (e.g. `A -> B`) is *not* part of the `l1` core syntax.
   If you need to talk about functions/mappings in `l1`, model them relationally (see examples below).
 
