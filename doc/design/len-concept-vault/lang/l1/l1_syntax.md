@@ -1,253 +1,336 @@
-# `l1` Syntax
+# `l1` Syntax (refined, minimal, relational)
 
-`l1` is the first real formal layer. But it is still designed for humans, so it keeps the syntax local, contract-oriented, and readable.
+`l1` is the first *formal* layer of `len`. It is designed to be:
 
-The stable core of `l1` is:
+- **relational-first** (facts and relations, not pseudocode)
+- **contract/law-first** (truth statements are explicit and central)
+- **small** (few keywords, few special forms)
+- **strict** (no “empty words”; `l0` is where natural language tolerance lives)
 
-- declarations first
-- specs as the main semantic unit
-- formulas in lightweight FOL-style syntax
-- optional quasi steps for proof hints or implementation steering
+---
 
-### `l1` Design Constraint
+## 1) Core ideas (semantic model)
 
-`l1` should remain relational and contract-first.
-It should not collapse into ordinary pseudocode.
+`l1` keeps three roles distinct:
 
-This means:
+1. **Ontology / vocabulary**
+   - `type` declares carrier types (names for sorts of values)
+   - `rel` declares relations (predicates); relations are the semantic primitive
 
-- `type` and `rel` are the main building blocks for declarations, while `fn` is secondary and usually interpreted (remains open for interpretation)
-- `rel` stands for relation or predicate declaration
-- `fn` stands for function declaration 
-- `contract` with list of `spec` remains primary semantic unit of reasoning and documentation, while individual `spec` make usage of `rel` to express all sorts of relations and properties, while `fn` is secondary and usually interpreted (remains open for interpretation)
-- `quasi` is allowed for steering, not for replacing the contract language
-- `contract` comes with documentation and reasoning aid except for rigorous `spec` which must hold
+2. **Definition / derived concept**
+   - `def` introduces *derived* predicates or *collection-like* concepts from formulas  
+   - “what this name means”
 
+3. **Truth / law**
+   - `spec` states a *law/contract* that must hold (premises ⇒ obligations)
+   - “what must be true”
 
-### `l1` Scope
+**Key separation:**
 
-`l1` should cover:
+- `def` describes *new concepts* (derived predicates / collection-like concepts).
+- `spec` describes *truths about concepts* (laws/contracts that must hold).
 
-- types and signatures
-- relations and helper functions
-- contracts, policies, queries, and validation rules through `spec`
-- local quantification
-- witness-oriented statements
-- partially constructive quasi blocks
+---
 
+## 2) Minimal keyword set
 
-### `l1` Comments and Docstrings
+A small, teachable kernel:
 
-Doctrings are comments. 
+- `import`
+- `type`
+- `rel`
+- `def`
+- `spec`
+- `given`
+- `must`
+- `quasi` *(informal guidance only; no formal semantics / no formal logical reasoning)*
 
-"single line docstring" is a string with double quotes inside any element of the code, such as a type, relation, function, spec, contract, policy, query, or validation rule. It is used for documentation and reasoning purposes, and it can be attached to any element in `l1`. It is ignored by the formal semantics, but it can be used for documentation, reasoning, and communication purposes. It can be attached to any element in `l1`, such as types, relations, functions, specs, contracts, policies, queries, and validation rules.
+Everything else should be library-level or future-layer sugar.
 
-```len
+---
+
+## 3) Files, folders, and imports
+
+- **Folder = module boundary.**
+- **File = contribution to the folder scope.**
+- There is no `module` keyword in `l1`.
+
+Imports are explicit:
+
+```
+import foo/bar
+import math/set as Set
+```
+
+(Exact import resolution rules are handled by tooling; `l1` keeps the surface small.)
+
+---
+
+## 4) Comments and docstrings
+
+- Docstrings are allowed anywhere and **ignored by formal semantics**.
+- Prefer docstrings over line comments for structured documentation.
+
+```
+"single-line docstring"
+
 """
-Mutli-line docstring is a string with triple double quotes that can span multiple lines, and it is used for documentation and reasoning purposes, and it can be attached to any element in `l1`. They are equally ignored by the formal syntax validation, but they can be used for documentation, reasoning, and communication purposes.
+Multi-line docstring.
+Ignored by formal semantics.
+Useful for intent, examples, and notes.
 """
 ```
 
-> Important: as docstrings are embedded in the code, they can be attached to specific elements in the code, such as types, relations, functions, specs, contracts, policies, queries, and validation rules. This gives room for optional semantic attachments or annotations.
-Plus we use blocks of `<#` .. `#>`to deactivate any part of the code, but for documentation and reasoning purposes please use docstrings instead of comments, as they are more structured and can be attached to specific elements in the code. Furthermore, `#` at the beginning of a line is also a comment, which is again not recommended for documentation purposes, as it is less structured and cannot be attached to specific elements in the code.
+---
 
-Basically they are ignored by the formal semantics, but they can be used for documentation, reasoning, and communication purposes. They can be attached to any element in `l1`, such as types, relations, functions, specs, contracts, policies, queries, and validation rules.
+## 5) Declarations
 
-Furthermore, as we come from l0 natural language specifications, we can have a Empty keywords or reserved words in which can be droped without changing the semantics or formal specifications.
+### 5.1 `type`
 
-- `a` is empty
-- `the` is empty
-- `is` is empty
-- `are` is empty
-- `of` is empty
-- `to` is empty
-- `for` is empty ??? or is it a reserved word for quantification? TBC
-- `each` is empty
+Carrier declaration:
 
-However, these words are important syntactic sugar:
+```
+type Expr
+type Int
+type Op
+```
 
-- `be` or `is` or `are` means `equals` 
-- `contains` or `has` means `in`
+### 5.2 `rel`
 
-Once normalized, these words can be dropped without changing the semantics, but they can be used for readability and for making the specifications more natural and intuitive for humans.
+Relation declaration (predicate signature). `rel` is the only semantic primitive besides `type`.
 
-### `l1` Logical Formulas
-Logical formulas in `l1` should be lightweight and FOL-style, with support for quantifiers, connectives, and basic predicates. They should be readable and intuitive for humans, while still being precise enough for formal reasoning.
+```
+rel Const(e: Expr, v: Int)
+rel Binary(e: Expr, op: Op, l: Expr, r: Expr)
+rel Eval(e: Expr, v: Int)
+```
 
-- `and` is *conjunction*
-- `or` is *disjunction*
-- `not` is *negation*
+Notes:
 
-therea also quantifiers:
-- `forall` is *universal quantification*
-- `exists` is *existential quantification*
+- A unary `rel P(x: T)` is set/class-like.
+- An n-ary `rel R(...)` is a general predicate.
+- If you want “functions”, express them as relations plus laws (e.g. uniqueness/totality) in `spec`,
+  or as derived concepts in `def`.
 
-plus set-theoretic predicates:
+Example (function as relation + laws):
 
-- `in` is *membership*
-- `subset` is *subset*
-- `union` is *union*
-- `intersection` is *intersection*
-- `difference` is *set difference*
-- `empty` is *empty set*
-- `superset` is *superset*
-- `subseteq` is *subset or equal*
-- `superseteq` is *superset or equal*
+```
+type A
+type B
+type F
 
+rel Fun(A: type, B: type, f: F)
+rel Applies(f: F, x: A, y: B)
 
-### `l1` Operators And Reserved Forms (Symbols)
+spec total_functionality(f: F, A: type, B: type)
+given Fun(A, B, f)
+must forall x: A. exists y: B. Applies(f, x, y)
+must forall x: A. forall y1: B. forall y2: B.
+    (Applies(f, x, y1) and Applies(f, x, y2)) -> y1 = y2
+```
 
-These are part of the concrete syntax even if they are not word-keywords.
+(Here `total + single-valued` gives you the usual extensional “function” behavior without introducing `fn` as a semantic primitive.)
 
-- `->` is `implies`
-- `<->`  is `iff`
-- `=` is `equals`
-- `!=` is `not equals`
+---
 
-- `<` is reserved and stands for *less than*, but it can be declared as a symbol for other meanings in the language, so it is not reserved for that meaning and must be explicitly declared as a symbol in the language. The same applies to the other comparison operators.
-- `<=` is *less than or equal*
-- `>` is *greater than*
-- `>=` is *greater than or equal*
-- `:` is used for type annotations and for separating variable names from their types in quantifiers
-- `:=` is `decl` 
-- `.` is used for member access and for separating namespaces or for logical formula scoping
-- `,` is used for separating arguments in relations and functions, and for separating conjuncts in formulas
-- `(` and `)` are used for grouping and for function application
-- `[` and `]` are used for array indexing and for denoting sets or lists
+## 6) Formulas (lightweight FOL)
 
-composition, application, and abstraction?
+`l1` formulas are first-order-logic style.
 
-list is an ordered set, array is a fixed-size collection of elements, set is an unordered collection of unique elements, tuple is an ordered collection of fixed number of elements.
+### 6.0 Arrow tokens: implication vs mapping
 
+`l1` uses arrows in two different “worlds”, and they should not be confused:
 
-All of the above are syntactic sugar for the underlying logical meaning, but they are not reserved for that meaning and must be explicitly declared as symbols in the language.
+- **Logical implication** inside formulas uses `->` (and `<->` for iff).
+- **Mapping / function type notation** (e.g. `A -> B`) is *not* part of the `l1` core syntax.
+  If you need to talk about functions/mappings in `l1`, model them relationally (see examples below).
 
-> arrays? square brackets? parentheses? commas?
+About `=>`:
 
-declared as symbols in the language, but they are reserved for their logical meaning.
+- `=>` is **not** a core token in `l1`.
+- If you want an alternate implication glyph for readability, keep it as *pure surface sugar* for `->` and normalize it away immediately.
+  Do not give `=>` a second meaning (like “maps to”), otherwise the language will drift.
 
+Recommended policy:
 
+- Reserve `=>` and `<->` for logic.
+- For “maps to” in docs/examples, use words (`mapsTo(f, x, y)` as a relation) or a named relation like `Applies(f, x, y)`.
 
-### Recommended Core `l1` Keywords
+### 6.1 Connectives & quantifiers
 
-These should be treated as the main `l1` keyword set.
+- `and`, `or`, `not`
+- `forall x: T. <formula>`
+- `exists x: T. <formula>`
+- `->` (implies), `<->` (iff)
 
-1) namespace, module, import, export for structuring and modularity:
-- `module`
-- `import` and `import as` for importing other modules with optional aliasing
-- `export` is optional, but if defined, then not listed elemetns are not exported by default, otherwise all elements are exported by default.
+### 6.2 Equality
 
-2) declaration keywords for declaring the main concepts of the domain:
-- `decl` 
-- `symbol` helps with syntactic sugar for declaring symbols without a fixed signature, which can be useful for sketching out ideas or for domains that are not well understood yet. It can also be used for declaring a symbol of discourse for quantification.
-- `domain` allows for open-ended declarations of symbols and relations without a fixed signature, which can be useful for sketching out ideas or for domains that are not well understood yet. It can also be used for declaring a domain of discourse for quantification.
+- `=` and `!=`
 
-- `type`
-- `rel`
-- `fn`
+### 6.3 No “empty words”
 
--  `contract <name>` is for grouping related specs and for documentation and reasoning purposes, but it is not a replacement for `spec` and should be used for sketching out ideas or for domains that are not well understood yet. It can also be used for declaring a contract for a given set of specs, policies, queries, or validation rules.
+Words like `a`, `the`, `is`, `are`, `of`, `to`, `each` are **not** part of the formal grammar.
+Use explicit logical structure instead. This keeps parsing and normalization crisp.
 
-    - `meta` (optional)
-        - `goal`: docstring (optional)
-        - `context`: docstring (optional)
-        - `given`: docstring (optional)
-        - `when`: docstring (optional)
-        - `then`: docstring (optional)
-        - `because`: docstring (optional)
-        - `example`: docstring (optional)
-        - `counterexample`: docstring (optional)
-        - `ambiguity`: docstring (optional)
-        - `question`: docstring (optional)
-        - `note`: docstring (optional)
-        - `kind`: docstring (optional)
-        - `tags`: list of docstring (optional)
+---
 
-        `contract.meta` is a synonym for `open spec`, but is a form of documentation. It is more open ended suggestive of the intended meaning in `l1` which is to write a contract that can be later refined into an implementation or proof. It can still contain verbal or natural language parts as doc strings, but the main point is that it is a contract that can be refined into an implementation or proof.
+## 7) `def` — definitions (derived concepts)
 
-    - `satisfies`:
-        is followed by a list of `spec` names that this contract satisfies, but it is not a replacement for `spec` and should be used for sketching out ideas or for domains that are not well understood yet. It can also be used for declaring that a given contract satisfies a given set of specs, policies, queries, or validation rules.
+`def` introduces a *meaning* by expansion to a formula. Use it for aliases and derived predicates.
 
-- `spec` is a rigorous formal specification of a contract, policy, query, or validation rule, and it is the main semantic unit in `l1`. It is used for documentation and reasoning purposes, and it can be attached to any element in `l1`, such as types, relations, functions, contracts, policies, queries, and validation rules. It is the main unit of meaning in `l1`, and it is the main unit of reasoning in `l1`, but it is not a replacement for natural language specifications and should be used for sketching out ideas or for domains that are not well understood yet. It can also be used for declaring a specification for a given contract, policy, query, or validation rule.
-    - `requires`
-        is input constraint 
+Two common patterns are supported conceptually:
 
-    - `ensures <contraint_name>: <logical formula>`
+### 7.0 Examples inspired by “shaving the yak”
 
-        is followed by name of the constrint and a logical formula that states the constraint. The logical formula can be a simple formula or a complex formula with quantifiers and connectives.
+A minimal “function-stack” vocabulary (purely relational core):
 
-        there can be multiple `ensures` clauses for a given `spec`, and they can be named for reference in proofs or implementations, but they are not required to be named. Importantly, the `ensures` clauses are joined into a big logical AND clause and must all hold together, so they are not independent constraints but rather parts of a single contract that must be satisfied as a whole. This allows for more modular and compositional reasoning about the contract, as well as for better error reporting and debugging when the contract is violated.
+```
+type A
+type B
+type F
 
-early logical formulas coem with the following keywords:
-- `forall`
-- `exists`
-- `and`
-- `or`
-- `not`
+rel Fun(A: type, B: type, f: F)
+rel total(f: F)
+rel injective(f: F)
+rel surjective(f: F)
 
+def bijective(f: F) as injective(f) and surjective(f)
 
-- `open` is synonym for abstract, but it is more suggestive of the intended meaning in `l1` which is to open a contract or policy for later filling in of details, proof hints, or implementation steering.
+def TotalFun(A, B, f) as Fun(A, B, f) and total(f)
+def BijectiveFun(A, B, f) as Fun(A, B, f) and bijective(f)
+```
 
-- `quasi`
-    - `impl` or `proof` for proof hints or implementation steering, but not for replacing the contract language. It can be used for sketching out ideas or for domains that are not well understood yet. It can also be used for declaring a proof sketch or an implementation sketch for a given contract.
+Collection-like “Hom-set” style (still just `def`):
 
-    can use 
-        - `choose`
-        - `let`
-        - `show`
-        - `assume`
-        - `witness`
-        - `case`
-        - `induction`
-        - `then`
+```
+def Hom(A, B) as f where TotalFun(A, B, f)
+```
 
-> TODO: add policies, queries, and validation rules as keywords, but they can be used as annotations for specs or contracts, so they are not strictly necessary as keywords, but they can be useful for documentation and reasoning purposes.
+This stays aligned with the recommendation: keep the semantic core as `type`, `rel`, `def`, and express structure via relations + definitions.
 
+### 7.1 Predicate alias (most common)
 
-- `choose` is *witness selection* for existential quantification, but it is not a replacement for `exists` and should be used for sketching out ideas or for domains that are not well understood yet. It can also be used for declaring a witness for a given existential quantification.
-- `let` is for defining local variables or for introducing intermediate steps in a proof or implementation, but it is not a replacement for quantifiers and should be used for sketching out ideas or for domains that are not well understood yet. It can also be used for declaring a local variable or an intermediate step for a given contract or policy.
-- `show` is for stating a goal or a subgoal in a proof or implementation, but it is not a replacement for `ensures` and should be used for sketching out ideas or for domains that are not well understood yet. It can also be used for declaring a goal or a subgoal for a given contract or policy.
+```
+def bijective(f) as injective(f) and surjective(f)
 
+def TotalFun(A, B, f) as Fun(A, B, f) and total(f)
+```
 
-union, intersection, set difference, subset, membership?
+### 7.2 “Collection-like” definition (set-builder view)
 
-true and false as keywords or symbols?
+If you want a type/class-like reading, use a binder in the definition:
 
+```
+def TotalFuns(A, B) as f where
+    Fun(A, B, f) and total(f)
+```
 
-### Example `l1`
+This is a *derived concept* whose intended reading is “the collection of all `f` such that …”.
+(Exactly how “collections” are represented internally is a normalization detail; the surface syntax stays simple.)
 
-```len
+---
+
+---
+
+## 8) `spec` — laws / contracts (truth statements)
+
+`spec` introduces a *truth obligation*. It is the unit of reasoning and verification.
+
+Structure:
+
+- `spec <name>(...)`
+- zero or more `given <formula>` premises
+- one or more `must <formula>` obligations
+
+Interpretation:
+
+- The spec asserts: **(given₁ and … and givenₙ) -> (must₁ and … and mustₖ)**
+
+Example:
+
+```
+spec union_contains_left(A: Set, B: Set, U: Set)
+given union(A, B, U)
+must forall x. has(A, x) -> has(U, x)
+```
+
+Notes:
+
+- Use multiple `must` lines for readability; they are conjunctive.
+- `spec` is for laws/theorems/contracts/policies—statements that must hold.
+
+---
+
+## 9) `quasi` — open-ended implementation/proof guidance (walled off)
+
+`quasi` is an escape hatch for proof hints, implementation steering, or constructive sketches.
+It has **no formal semantics** and is **not part of formal logical reasoning**.
+
+```
+spec eval_const(e: Expr, v: Int)
+given Const(e, v)
+must Eval(e, v)
+
+quasi
+    "Implementation/proof sketch goes here."
+```
+
+Rule of thumb:
+
+- If it matters semantically, it must be in `given`/`must`/`def`/`spec`.
+- If it’s guidance, it belongs under `quasi`.
+
+---
+
+## 10) Style constraints (to keep `l1` crisp)
+
+- Prefer `rel` over `fn`. (If `fn` exists at all, treat it as surface sugar for a relation plus laws.)
+- Avoid heavy built-in set/collection syntax in the core. Prefer relations (`has`, `member`, etc.)
+  and define conveniences in a prelude library.
+- Reserve punctuation operators consistently; don’t allow redefining core logical/equality operators.
+
+---
+
+## 11) End-to-end example (calculator-style)
+
+```
 type Expr
 type Op
 type Int
 
-rel Const(Expr, Int)
-rel Binary(Expr, Op, Expr, Expr)
-rel AddOp(Op)
-rel DivOp(Op)
-rel Eval(Expr, Int)
+rel Const(e: Expr, v: Int)
+rel Binary(e: Expr, op: Op, l: Expr, r: Expr)
 
-fn add(a: Int, b: Int) -> Int
+rel AddOp(op: Op)
+rel DivOp(op: Op)
 
-spec eval_const(e: Expr) -> v: Int
-	requires Const(e, v)
-	ensures Eval(e, v)
+rel Eval(e: Expr, v: Int)
+rel add(a: Int, b: Int, out: Int)
 
-spec eval_add(e: Expr, op: Op, l: Expr, r: Expr) -> v: Int
-	requires Binary(e, op, l, r)
-	requires AddOp(op)
-	requires exists a: Int. Eval(l, a)
-	requires exists b: Int. Eval(r, b)
-	ensures exists a: Int. exists b: Int.
-		Eval(l, a) and Eval(r, b) and v = add(a, b)
-	ensures Eval(e, v)
+spec eval_const(e: Expr, v: Int)
+given Const(e, v)
+must Eval(e, v)
 
-spec no_div_by_zero(e: Expr, op: Op, l: Expr, r: Expr) -> ok: Int
-	requires Binary(e, op, l, r)
-	requires DivOp(op)
-	ensures exists b: Int. Eval(r, b) and b != 0
-	open DivisionResultPolicy
+spec eval_add(e: Expr, op: Op, l: Expr, r: Expr, v: Int)
+given Binary(e, op, l, r)
+given AddOp(op)
+given exists a: Int. Eval(l, a)
+given exists b: Int. Eval(r, b)
+must exists a: Int. exists b: Int.
+    Eval(l, a) and Eval(r, b) and add(a, b, v)
+must Eval(e, v)
+
+spec no_div_by_zero(e: Expr, op: Op, l: Expr, r: Expr)
+given Binary(e, op, l, r)
+given DivOp(op)
+must exists b: Int. Eval(r, b) and b != 0
 ```
-## See Also
 
-- [[program]] for the big picture of how `l1` fits into the overall language design and its relationship with other layers.
+This demonstrates the intended feel:
+
+- vocabulary via `type`/`rel`
+- truths via `spec` (`given`/`must`)
+- no imperative pseudocode in the core
+- constructive or proof guidance (if needed) goes into `quasi`
+
+---
