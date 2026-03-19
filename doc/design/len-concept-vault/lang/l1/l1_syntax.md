@@ -16,10 +16,12 @@ It should not collapse into ordinary pseudocode.
 
 This means:
 
-- `rel` usage in `contract` with `spec` remains primary
-- `fn` is secondary and usually interpreted (remains open for interpretation)
+- `type` and `rel` are the main building blocks for declarations, while `fn` is secondary and usually interpreted (remains open for interpretation)
+- `rel` stands for relation or predicate declaration
+- `fn` stands for function declaration 
+- `contract` with list of `spec` remains primary semantic unit of reasoning and documentation, while individual `spec` make usage of `rel` to express all sorts of relations and properties, while `fn` is secondary and usually interpreted (remains open for interpretation)
 - `quasi` is allowed for steering, not for replacing the contract language
-- `contract` comes with documentation and reasoning aid except for rigorous `spec`
+- `contract` comes with documentation and reasoning aid except for rigorous `spec` which must hold
 
 
 ### `l1` Scope
@@ -36,8 +38,20 @@ This means:
 
 ### `l1` Comments and Docstrings
 
-Basically they are ignored by the formal semantics, but they can be used for documentation, reasoning, and communication purposes. They can be attached to any element in `l1`, such as types, relations, functions, specs, contracts, policies, queries, and validation rules.
+Doctrings are comments. 
 
+"single line docstring" is a string with double quotes inside any element of the code, such as a type, relation, function, spec, contract, policy, query, or validation rule. It is used for documentation and reasoning purposes, and it can be attached to any element in `l1`. It is ignored by the formal semantics, but it can be used for documentation, reasoning, and communication purposes. It can be attached to any element in `l1`, such as types, relations, functions, specs, contracts, policies, queries, and validation rules.
+
+```len
+"""
+Mutli-line docstring is a string with triple double quotes that can span multiple lines, and it is used for documentation and reasoning purposes, and it can be attached to any element in `l1`. They are equally ignored by the formal syntax validation, but they can be used for documentation, reasoning, and communication purposes.
+"""
+```
+
+> Important: as docstrings are embedded in the code, they can be attached to specific elements in the code, such as types, relations, functions, specs, contracts, policies, queries, and validation rules. This gives room for optional semantic attachments or annotations.
+Plus we use blocks of `<#` .. `#>`to deactivate any part of the code, but for documentation and reasoning purposes please use docstrings instead of comments, as they are more structured and can be attached to specific elements in the code. Furthermore, `#` at the beginning of a line is also a comment, which is again not recommended for documentation purposes, as it is less structured and cannot be attached to specific elements in the code.
+
+Basically they are ignored by the formal semantics, but they can be used for documentation, reasoning, and communication purposes. They can be attached to any element in `l1`, such as types, relations, functions, specs, contracts, policies, queries, and validation rules.
 
 Furthermore, as we come from l0 natural language specifications, we can have a Empty keywords or reserved words in which can be droped without changing the semantics or formal specifications.
 
@@ -132,27 +146,37 @@ These should be treated as the main `l1` keyword set.
 - `rel`
 - `fn`
 
--  `contract` is a synonym for `open spec`, but is a form of documentation. It is more open ended suggestive of the intended meaning in `l1` which is to write a contract that can be later refined into an implementation or proof. It can still contain verbal or natural language parts as doc strings, but the main point is that it is a contract that can be refined into an implementation or proof.
+-  `contract <name>` is for grouping related specs and for documentation and reasoning purposes, but it is not a replacement for `spec` and should be used for sketching out ideas or for domains that are not well understood yet. It can also be used for declaring a contract for a given set of specs, policies, queries, or validation rules.
 
-    - `goal` (optional)
-    - `context` (optional)
-    - `given` (optional)
-    - `when` (optional)
-    - `then` (optional)
-    - `because` (optional)
-    - `example` (optional)
-    - `counterexample` (optional)
-    - `ambiguity` (optional)
-    - `question` (optional)
-    - `note` (optional)
+    - `meta` (optional)
+        - `goal`: docstring (optional)
+        - `context`: docstring (optional)
+        - `given`: docstring (optional)
+        - `when`: docstring (optional)
+        - `then`: docstring (optional)
+        - `because`: docstring (optional)
+        - `example`: docstring (optional)
+        - `counterexample`: docstring (optional)
+        - `ambiguity`: docstring (optional)
+        - `question`: docstring (optional)
+        - `note`: docstring (optional)
+        - `kind`: docstring (optional)
+        - `tags`: list of docstring (optional)
 
-    - `spec`
-        - `requires`
-        - `ensures <contraint_name>: <logical formula>`
+        `contract.meta` is a synonym for `open spec`, but is a form of documentation. It is more open ended suggestive of the intended meaning in `l1` which is to write a contract that can be later refined into an implementation or proof. It can still contain verbal or natural language parts as doc strings, but the main point is that it is a contract that can be refined into an implementation or proof.
 
-            is followed by name of the constrint and a logical formula that states the constraint. The logical formula can be a simple formula or a complex formula with quantifiers and connectives.
+    - `satisfies`:
+        is followed by a list of `spec` names that this contract satisfies, but it is not a replacement for `spec` and should be used for sketching out ideas or for domains that are not well understood yet. It can also be used for declaring that a given contract satisfies a given set of specs, policies, queries, or validation rules.
 
-            there can be multiple `ensures` clauses for a given `spec`, and they can be named for reference in proofs or implementations, but they are not required to be named. Importantly, the `ensures` clauses are joined into a big logical AND clause and must all hold together, so they are not independent constraints but rather parts of a single contract that must be satisfied as a whole. This allows for more modular and compositional reasoning about the contract, as well as for better error reporting and debugging when the contract is violated.
+- `spec` is a rigorous formal specification of a contract, policy, query, or validation rule, and it is the main semantic unit in `l1`. It is used for documentation and reasoning purposes, and it can be attached to any element in `l1`, such as types, relations, functions, contracts, policies, queries, and validation rules. It is the main unit of meaning in `l1`, and it is the main unit of reasoning in `l1`, but it is not a replacement for natural language specifications and should be used for sketching out ideas or for domains that are not well understood yet. It can also be used for declaring a specification for a given contract, policy, query, or validation rule.
+    - `requires`
+        is input constraint 
+
+    - `ensures <contraint_name>: <logical formula>`
+
+        is followed by name of the constrint and a logical formula that states the constraint. The logical formula can be a simple formula or a complex formula with quantifiers and connectives.
+
+        there can be multiple `ensures` clauses for a given `spec`, and they can be named for reference in proofs or implementations, but they are not required to be named. Importantly, the `ensures` clauses are joined into a big logical AND clause and must all hold together, so they are not independent constraints but rather parts of a single contract that must be satisfied as a whole. This allows for more modular and compositional reasoning about the contract, as well as for better error reporting and debugging when the contract is violated.
 
 early logical formulas coem with the following keywords:
 - `forall`
@@ -176,6 +200,9 @@ early logical formulas coem with the following keywords:
         - `case`
         - `induction`
         - `then`
+
+> TODO: add policies, queries, and validation rules as keywords, but they can be used as annotations for specs or contracts, so they are not strictly necessary as keywords, but they can be useful for documentation and reasoning purposes.
+
 
 - `choose` is *witness selection* for existential quantification, but it is not a replacement for `exists` and should be used for sketching out ideas or for domains that are not well understood yet. It can also be used for declaring a witness for a given existential quantification.
 - `let` is for defining local variables or for introducing intermediate steps in a proof or implementation, but it is not a replacement for quantifiers and should be used for sketching out ideas or for domains that are not well understood yet. It can also be used for declaring a local variable or an intermediate step for a given contract or policy.
