@@ -22,6 +22,55 @@ This means:
 - `quasi` is allowed for steering, not for replacing the contract language
 - `contract` is documentation and reasoning aid, not a replacement for `spec`
 
+
+### `l1` Scope
+
+`l1` should cover:
+
+- types and signatures
+- relations and helper functions
+- contracts, policies, queries, and validation rules through `spec`
+- local quantification
+- witness-oriented statements
+- partially constructive quasi blocks
+
+### `l1` Operators And Reserved Forms (Symbols)
+
+These are part of the concrete syntax even if they are not word-keywords.
+
+- `and` is *conjunction*
+- `or` is *disjunction*
+- `not` is *negation*
+
+- `->` is `implies`
+- `<->`  is `iff`
+- `=` is `equals`
+- `!=` is `not equals`
+
+- `<` is reserved and stands for *less than*, but it can be declared as a symbol for other meanings in the language, so it is not reserved for that meaning and must be explicitly declared as a symbol in the language. The same applies to the other comparison operators.
+- `<=` is *less than or equal*
+- `>` is *greater than*
+- `>=` is *greater than or equal*
+- `:` is used for type annotations and for separating variable names from their types in quantifiers
+- `:=` is `decl` 
+- `.` is used for member access and for separating namespaces or for logical formula scoping
+- `,` is used for separating arguments in relations and functions, and for separating conjuncts in formulas
+- `(` and `)` are used for grouping and for function application
+- `[` and `]` are used for array indexing and for denoting sets or lists
+
+composition, application, and abstraction?
+
+list is an ordered set, array is a fixed-size collection of elements, set is an unordered collection of unique elements, tuple is an ordered collection of fixed number of elements.
+
+
+All of the above are syntactic sugar for the underlying logical meaning, but they are not reserved for that meaning and must be explicitly declared as symbols in the language.
+
+> arrays? square brackets? parentheses? commas?
+
+declared as symbols in the language, but they are reserved for their logical meaning.
+
+
+
 ### Recommended Core `l1` Keywords
 
 These should be treated as the main `l1` keyword set.
@@ -86,46 +135,6 @@ union, intersection, set difference, subset, membership?
 
 true and false as keywords or symbols?
 
-### `l1` Operators And Reserved Forms
-
-These are part of the concrete syntax even if they are not word-keywords.
-
-- `->` is `implies`
-- `<->`  is `iff`
-- `=` is `equals`
-- `!=` is `not equals`
-- `<` is `less than`
-- `<=` is `less than or equal`
-- `>` is `greater than`
-- `>=` is `greater than or equal`
-- `:` is used for type annotations and for separating variable names from their types in quantifiers
-- `:=` is `decl` 
-- `.` is used for member access and for separating namespaces or for logical formula scoping
-- `,` is used for separating arguments in relations and functions, and for separating conjuncts in formulas
-- `(` and `)` are used for grouping and for function application
-- `[` and `]` are used for array indexing and for denoting sets or lists
-
-composition, application, and abstraction?
-
-list is an ordered set, array is a fixed-size collection of elements, set is an unordered collection of unique elements, tuple is an ordered collection of fixed number of elements.
-
-
-All of the above are syntactic sugar for the underlying logical meaning, but they are not reserved for that meaning and must be explicitly declared as symbols in the language.
-
-> arrays? square brackets? parentheses? commas?
-
-declared as symbols in the language, but they are reserved for their logical meaning.
-
-### `l1` Scope
-
-`l1` should cover:
-
-- types and signatures
-- relations and helper functions
-- contracts, policies, queries, and validation rules through `spec`
-- local quantification
-- witness-oriented statements
-- partially constructive quasi blocks
 
 ### Example `l1`
 
@@ -161,3 +170,6 @@ spec no_div_by_zero(e: Expr, op: Op, l: Expr, r: Expr) -> ok: Int
 	ensures exists b: Int. Eval(r, b) and b != 0
 	open DivisionResultPolicy
 ```
+## See Also
+
+- [[program]] for the big picture of how `l1` fits into the overall language design and its relationship with other layers.

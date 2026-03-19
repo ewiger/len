@@ -134,7 +134,7 @@ We also want unit tests: one expression should evaluate to seven, and one invali
 
 ## Level 1
 
-see [l1_syntax.md](./l1//l1_syntax.md)
+[[l1_syntax]]
 
 ## Level 2
 
