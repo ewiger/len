@@ -126,7 +126,7 @@ spec total_functionality(f: F, A: type, B: type)
 given Fun(A, B, f)
 must forall x: A. exists y: B. Applies(f, x, y)
 must forall x: A. forall y1: B. forall y2: B.
-    (Applies(f, x, y1) and Applies(f, x, y2)) -> y1 = y2
+    (Applies(f, x, y1) and Applies(f, x, y2)) => y1 = y2
 ```
 
 (Here `total + single-valued` gives you the usual extensional “function” behavior without introducing `fn` as a semantic primitive.)
@@ -141,27 +141,23 @@ must forall x: A. forall y1: B. forall y2: B.
 
 `l1` uses arrows in two different “worlds”, and they should not be confused:
 
-- **Logical implication** inside formulas uses `=>` (and `<=>` for iff).
+- **Logical implication** inside formulas uses `=>` (and `<=>` for iff). These tokens are reserved for logic.
 - **Mapping / function type notation** (e.g. `A -> B`) is *not* part of the `l1` core syntax.
-  If you need to talk about functions/mappings in `l1`, model them relationally (see examples below).
 
-About `=>`:
+  If you need to talk about functions/mappings in `l1`, model them relationally (see examples below), e.g. via a relation such as `Applies(f, x, y)` / `mapsTo(f, x, y)`.
 
-- `=>` is **not** a core token in `l1`.
-- If you want an alternate implication glyph for readability, keep it as *pure surface sugar* for `->` and normalize it away immediately.
-  Do not give `=>` a second meaning (like “maps to”), otherwise the language will drift.
+Policy:
 
-Recommended policy:
-
-- Reserve `=>` and `<->` for logic.
-- For “maps to” in docs/examples, use words (`mapsTo(f, x, y)` as a relation) or a named relation like `Applies(f, x, y)`.
+- Reserve `=>` and `<=>` for logic only.
+- Do not use `->` to mean “implies” in `l1`.
+- Do not use any arrow token to mean “maps to” in `l1` core; use a named relation instead.
 
 ### 6.1 Connectives & quantifiers
 
 - `and`, `or`, `not`
 - `forall x: T. <formula>`
 - `exists x: T. <formula>`
-- `->` (implies), `<->` (iff)
+- `=>` (implies), `<=>` (iff)
 
 ### 6.2 Equality
 
@@ -244,14 +240,14 @@ Structure:
 
 Interpretation:
 
-- The spec asserts: **(given₁ and … and givenₙ) -> (must₁ and … and mustₖ)**
+- The spec asserts: **(given₁ and … and givenₙ) => (must₁ and … and mustₖ)**
 
 Example:
 
 ```
 spec union_contains_left(A: Set, B: Set, U: Set)
 given union(A, B, U)
-must forall x. has(A, x) -> has(U, x)
+must forall x. has(A, x) => has(U, x)
 ```
 
 Notes:
