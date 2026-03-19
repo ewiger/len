@@ -18,7 +18,7 @@ One and first, big idea in the design of `len` is that it should not be a single
 
 1. **relation level one or `l1`** is the first real formal layer, but it is still designed for humans. It is a relational and contract-first language with a syntax that supports readability and local reasoning. It is not pseudocode, but it is also not a low-level logic. It is influenced by sorted logics, Haskell types, Prolog predicates and relations, and TLA+ specs. It is the main authoring layer for domain declarations, relations, and contracts.
 
-2. **canonical semantic level or `l2`** is the canonical semantic layer. It is more precise than `l1` because it identifies what kind of object each artifact is. In `l2`, domains are not semantic primitives. They become namespaces that contain canonical artifacts such as categories, algebraic structures, theories, effects, morphisms, theorems, and implementation objects. l2 evolves into exact semantic IR for guided code generation, backend compilation, proof, and validation (testing). Types, relations and contracts (specs) from `l1`, once normalized into `l2` artifacts, becomes exact semantical building blocks as modules with categories (specialized domains aspects) and more detailed knowledge containers that argue about those categories such as theories, morphisms, effects, theorems, and implementation objects. The later greatly depends on the domain. If it is about programming and IT infrastructure, then implementation objects are more likely to be code artifacts like services, classes, etc. If it is about math, then implementation objects are more likely to be proof artifacts.
+2. **canonical semantic level or `l2`** is the canonical semantic layer. It is more precise than `l1` because it does not merely restate contracts in a lower-level syntax; it identifies what kind of semantic artifact each declaration, relation, law, or implementation attachment actually is. In `l2`, domains are not semantic primitives. They become namespaces and provenance boundaries that contain canonical artifacts such as categories, algebraic structures, theories, effects, morphisms, theorems, and implementation objects. In that sense, `l2` is the exact semantic IR used for normalization, comparison, composition, mapping, guided code generation, backend compilation, proof, and validation. Types, relations, and contracts from `l1`, once normalized into `l2`, become explicit semantic building blocks whose final shape depends on the domain. In programming or infrastructure settings, implementation objects are more likely to be code artifacts such as services, modules, or classes. In mathematics, they are more likely to be proof artifacts.
 
 Another and second big idea is that the layering is not just cosmetic, but its in the hard of development process. We call this a semantic loop (somewhat similar to the print-eval-read loop in programming languages, but with more layers and more AI involvement):
 
@@ -57,22 +57,22 @@ Essentially, the pragmatics part of len includes:
 ## Layering Rationale
 
 The language should not be defined as a single flat syntax.
-It should be defined in layers with different responsibilities:
+It should be defined in layers with different responsibilities and different syntax:
 
-- `l0`: authoring and clarification in controlled natural language
+- `l0`: authoring and clarification in *problem-stating* natural language
 - `l1`: relational contracts and domain declarations
-- `l2`: canonical semantic objects for normalization, composition, and backend compilation
+- `l2`: canonical semantic artifacts for classification, normalization, mapping, and backend realization
 
 The point of the layering is not cosmetic.
 Each layer has a different job in the semantic loop:
 
-Human input -> `l0` -> `l1` -> `l2` -> backend logic / proof / validation
+Human input -> `l0` -> `l1` -> `l2` -> code / backend logic / proof / validation
 
 The main principle is:
 
 `l0` is for saying what is meant.
 `l1` is for writing the intended relation in a human-oriented formal way.
-`l2` is for making the semantic object precise enough to normalize, compare, map, and compile.
+`l2` is for classifying the semantic object precisely enough to normalize, compare, compose, map, and compile.
 
 ## Design Direction
 
@@ -80,7 +80,7 @@ The current direction is:
 
 - `l0` stays close to human language
 - `l1` is declaration-first and contract-first
-- `l2` is not just a lower-level hint, but a canonical semantic representation
+- `l2` is a canonical semantic artifact layer, not just a lower-level restatement of `l1`
 
 This means `l2` should not merely restate `l1` with more quantifiers.
 It should expose what kind of semantic artifact something actually is:
@@ -99,7 +99,7 @@ It should expose what kind of semantic artifact something actually is:
 | --- | --- | --- | --- |
 | `l0` | authoring, ambiguity surfacing, refinement dialogue | controlled natural language | candidate meaning |
 | `l1` | domain declarations and contracts | relations, types, specs, quasi steps | human-oriented formal spec |
-| `l2` | canonical semantic normalization | namespaces, categories, theories, morphisms, effects | backend-facing semantic IR |
+| `l2` | canonical semantic classification and normalization | namespaces, artifact kinds, semantic links | semantic IR for mapping, proof, validation, and backend generation |
 
 ## Level 0
 
@@ -163,13 +163,17 @@ The stable core of `l1` is:
 
 These should be treated as the main `l1` keyword set.
 
+- `define`
+- `decl`
+- `symbol`
+- `domain`
+
 - `type`
 - `rel`
 - `fn`
 - `spec`
 - `requires`
 - `ensures`
-- `define`
 - `open`
 - `quasi`
 - `choose`
@@ -195,6 +199,8 @@ These are part of the concrete syntax even if they are not word-keywords.
 - `>=`
 - `:`
 - `:=`
+
+declared as symbols in the language, but they are reserved for their logical meaning.
 
 ### `l1` Scope
 
