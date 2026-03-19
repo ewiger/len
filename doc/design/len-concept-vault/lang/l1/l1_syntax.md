@@ -1,7 +1,6 @@
 # `l1` Syntax
 
-`l1` is the first real formal layer.
-It is still designed for humans, so it keeps the syntax local, contract-oriented, and readable.
+`l1` is the first real formal layer. But it is still designed for humans, so it keeps the syntax local, contract-oriented, and readable.
 
 The stable core of `l1` is:
 
@@ -17,10 +16,10 @@ It should not collapse into ordinary pseudocode.
 
 This means:
 
-- `spec` remains primary
-- `fn` is secondary and usually interpreted
+- `rel` usage in `contract` with `spec` remains primary
+- `fn` is secondary and usually interpreted (remains open for interpretation)
 - `quasi` is allowed for steering, not for replacing the contract language
-- `contract` is documentation and reasoning aid, not a replacement for `spec`
+- `contract` comes with documentation and reasoning aid except for rigorous `spec`
 
 
 ### `l1` Scope
@@ -34,13 +33,57 @@ This means:
 - witness-oriented statements
 - partially constructive quasi blocks
 
-### `l1` Operators And Reserved Forms (Symbols)
 
-These are part of the concrete syntax even if they are not word-keywords.
+### `l1` Comments and Docstrings
+
+Basically they are ignored by the formal semantics, but they can be used for documentation, reasoning, and communication purposes. They can be attached to any element in `l1`, such as types, relations, functions, specs, contracts, policies, queries, and validation rules.
+
+
+Furthermore, as we come from l0 natural language specifications, we can have a Empty keywords or reserved words in which can be droped without changing the semantics or formal specifications.
+
+- `a` is empty
+- `the` is empty
+- `is` is empty
+- `are` is empty
+- `of` is empty
+- `to` is empty
+- `for` is empty ??? or is it a reserved word for quantification? TBC
+- `each` is empty
+
+However, these words are important syntactic sugar:
+
+- `be` or `is` or `are` means `equals` 
+- `contains` or `has` means `in`
+
+Once normalized, these words can be dropped without changing the semantics, but they can be used for readability and for making the specifications more natural and intuitive for humans.
+
+### `l1` Logical Formulas
+Logical formulas in `l1` should be lightweight and FOL-style, with support for quantifiers, connectives, and basic predicates. They should be readable and intuitive for humans, while still being precise enough for formal reasoning.
 
 - `and` is *conjunction*
 - `or` is *disjunction*
 - `not` is *negation*
+
+therea also quantifiers:
+- `forall` is *universal quantification*
+- `exists` is *existential quantification*
+
+plus set-theoretic predicates:
+
+- `in` is *membership*
+- `subset` is *subset*
+- `union` is *union*
+- `intersection` is *intersection*
+- `difference` is *set difference*
+- `empty` is *empty set*
+- `superset` is *superset*
+- `subseteq` is *subset or equal*
+- `superseteq` is *superset or equal*
+
+
+### `l1` Operators And Reserved Forms (Symbols)
+
+These are part of the concrete syntax even if they are not word-keywords.
 
 - `->` is `implies`
 - `<->`  is `iff`
@@ -88,24 +131,28 @@ These should be treated as the main `l1` keyword set.
 - `type`
 - `rel`
 - `fn`
-- `spec`
-    - `requires`
-    - `ensures`
-
-        si followed by name of the cons
 
 -  `contract` is a synonym for `open spec`, but is a form of documentation. It is more open ended suggestive of the intended meaning in `l1` which is to write a contract that can be later refined into an implementation or proof. It can still contain verbal or natural language parts as doc strings, but the main point is that it is a contract that can be refined into an implementation or proof.
 
-    - `context`
-    - `given`
-    - `when`
-    - `then`
-    - `because`
-    - `example`
-    - `counterexample`
-    - `ambiguity`
-    - `question`
-    - `note`
+    - `goal` (optional)
+    - `context` (optional)
+    - `given` (optional)
+    - `when` (optional)
+    - `then` (optional)
+    - `because` (optional)
+    - `example` (optional)
+    - `counterexample` (optional)
+    - `ambiguity` (optional)
+    - `question` (optional)
+    - `note` (optional)
+
+    - `spec`
+        - `requires`
+        - `ensures <contraint_name>: <logical formula>`
+
+            is followed by name of the constrint and a logical formula that states the constraint. The logical formula can be a simple formula or a complex formula with quantifiers and connectives.
+
+            there can be multiple `ensures` clauses for a given `spec`, and they can be named for reference in proofs or implementations, but they are not required to be named. Importantly, the `ensures` clauses are joined into a big logical AND clause and must all hold together, so they are not independent constraints but rather parts of a single contract that must be satisfied as a whole. This allows for more modular and compositional reasoning about the contract, as well as for better error reporting and debugging when the contract is violated.
 
 early logical formulas coem with the following keywords:
 - `forall`
@@ -129,6 +176,10 @@ early logical formulas coem with the following keywords:
         - `case`
         - `induction`
         - `then`
+
+- `choose` is *witness selection* for existential quantification, but it is not a replacement for `exists` and should be used for sketching out ideas or for domains that are not well understood yet. It can also be used for declaring a witness for a given existential quantification.
+- `let` is for defining local variables or for introducing intermediate steps in a proof or implementation, but it is not a replacement for quantifiers and should be used for sketching out ideas or for domains that are not well understood yet. It can also be used for declaring a local variable or an intermediate step for a given contract or policy.
+- `show` is for stating a goal or a subgoal in a proof or implementation, but it is not a replacement for `ensures` and should be used for sketching out ideas or for domains that are not well understood yet. It can also be used for declaring a goal or a subgoal for a given contract or policy.
 
 
 union, intersection, set difference, subset, membership?
