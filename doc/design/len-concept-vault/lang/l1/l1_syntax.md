@@ -304,22 +304,22 @@ rel Eval(e: Expr, v: Int)
 rel add(a: Int, b: Int, out: Int)
 
 spec eval_const(e: Expr, v: Int)
-given Const(e, v)
-must Eval(e, v)
+    given Const(e, v)
+    must Eval(e, v)
 
 spec eval_add(e: Expr, op: Op, l: Expr, r: Expr, v: Int)
-given Binary(e, op, l, r)
-given AddOp(op)
-given exists a: Int. Eval(l, a)
-given exists b: Int. Eval(r, b)
-must exists a: Int. exists b: Int.
-    Eval(l, a) and Eval(r, b) and add(a, b, v)
-must Eval(e, v)
+    given Binary(e, op, l, r)
+    given AddOp(op)
+    given exists a: Int. Eval(l, a)
+    given exists b: Int. Eval(r, b)
+    must exists a: Int. exists b: Int.
+        Eval(l, a) and Eval(r, b) and add(a, b, v)
+    must Eval(e, v)
 
 spec no_div_by_zero(e: Expr, op: Op, l: Expr, r: Expr)
-given Binary(e, op, l, r)
-given DivOp(op)
-must exists b: Int. Eval(r, b) and b != 0
+  given Binary(e, op, l, r)
+  given DivOp(op)
+  must exists b: Int. Eval(r, b) and b != 0
 ```
 
 This demonstrates the intended feel:
