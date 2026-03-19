@@ -103,161 +103,38 @@ It should expose what kind of semantic artifact something actually is:
 
 ## Level 0
 
-`l0` is natural language, but not arbitrary prose.
-It is the authoring layer used to state intent, examples, missing assumptions, and clarifications before committing to a stronger formal form.
+`l0` is natural language and it does have neither fixed syntax nor keywords. However, it is still a controlled natural language in the sense that it is expected to be translatable into `l1` with the help of LLMs and prompt engineering.
 
-`l0` should be permissive, but a small set of authoring markers is useful.
+So certain structure is expected in `l0` to make it more easily translatable into `l1`:
 
-### Recommended `l0` Keywords
+- title as problem statement that asks for a solution in a domain
+- optional context that describes the domain and the problem in more detail
+- optional initial conditions or assumptions
+- optional action or event that triggers the problem
+- optional expected outcome or goal
+- optional motivation or reasoning behind the problem 
+- optional examples or counterexamples that clarify the problem
 
-These are not logical primitives.
-They are discourse markers that help an agent produce `l1`.
+A great cousin of `l0` is the Gherkin language used in BDD (Behavior-Driven Development) for writing test scenarios. It has a similar structure with keywords like `Given`, `When`, `Then`, and so on. However, `l0` is not limited to software testing scenarios. It can be used for any kind of problem statement that requires rigorous specification and solution.
 
-- `goal`
-- `context`
-- `given`
-- `when`
-- `then`
-- `because`
-- `example`
-- `counterexample`
-- `ambiguity`
-- `question`
-- `note`
+Another form of `l0` is 'something.len' file which a markdown file that contains a mix of documentation and `len` meta code or problem statement snippets. Everything in natural language is `l0`, and the code snippets are expected to be translatable into `l1` and later `l2` depending on their level of formality and precision.
 
-### Role Of `l0`
-
-`l0` should support:
-
-- stating the problem in domain language
-- recording ambiguities without forcing premature precision
-- giving examples and counterexamples
-- exposing missing assumptions
-- preparing an agent-to-`l1` normalization step
 
 ### Example `l0`
 
-```text
-goal: evaluate calculator expressions safely
-context: arithmetic expressions may contain division
-given: the application should reuse arithmetic knowledge
-then: division by zero must be rejected
-example: 2 + 3 should evaluate to 5
-ambiguity: should division return an error or an optional value?
-question: do we want integer division or rational division?
+```len
+Design a small calculator language.
+
+The language supports integer literals, add, subtract, multiply, and divide.
+Evaluation must produce one integer result for any valid expression.
+Division by zero is invalid.
+We also want unit tests: one expression should evaluate to seven, and one invalid program should be rejected.
+
 ```
 
 ## Level 1
 
-`l1` is the first real formal layer.
-It is still designed for humans, so it keeps the syntax local, contract-oriented, and readable.
-
-The stable core of `l1` is:
-
-- declarations first
-- specs as the main semantic unit
-- formulas in lightweight FOL-style syntax
-- optional quasi steps for proof hints or implementation steering
-
-### Recommended Core `l1` Keywords
-
-These should be treated as the main `l1` keyword set.
-
-- `define`
-- `decl`
-- `symbol`
-- `domain`
-
-- `type`
-- `rel`
-- `fn`
-- `spec`
-- `requires`
-- `ensures`
-- `open`
-- `quasi`
-- `choose`
-- `let`
-- `show`
-- `forall`
-- `exists`
-- `and`
-- `or`
-- `not`
-
-### `l1` Operators And Reserved Forms
-
-These are part of the concrete syntax even if they are not word-keywords.
-
-- `->`
-- `<->`
-- `=`
-- `!=`
-- `<`
-- `<=`
-- `>`
-- `>=`
-- `:`
-- `:=`
-
-declared as symbols in the language, but they are reserved for their logical meaning.
-
-### `l1` Scope
-
-`l1` should cover:
-
-- types and signatures
-- relations and helper functions
-- contracts, policies, queries, and validation rules through `spec`
-- local quantification
-- witness-oriented statements
-- partially constructive quasi blocks
-
-### Example `l1`
-
-```len
-type Expr
-type Op
-type Int
-
-rel Const(Expr, Int)
-rel Binary(Expr, Op, Expr, Expr)
-rel AddOp(Op)
-rel DivOp(Op)
-rel Eval(Expr, Int)
-
-fn add(a: Int, b: Int) -> Int
-
-spec eval_const(e: Expr) -> v: Int
-	requires Const(e, v)
-	ensures Eval(e, v)
-
-spec eval_add(e: Expr, op: Op, l: Expr, r: Expr) -> v: Int
-	requires Binary(e, op, l, r)
-	requires AddOp(op)
-	requires exists a: Int. Eval(l, a)
-	requires exists b: Int. Eval(r, b)
-	ensures exists a: Int. exists b: Int.
-		Eval(l, a) and Eval(r, b) and v = add(a, b)
-	ensures Eval(e, v)
-
-spec no_div_by_zero(e: Expr, op: Op, l: Expr, r: Expr) -> ok: Int
-	requires Binary(e, op, l, r)
-	requires DivOp(op)
-	ensures exists b: Int. Eval(r, b) and b != 0
-	open DivisionResultPolicy
-```
-
-### `l1` Design Constraint
-
-`l1` should remain relational and contract-first.
-It should not collapse into ordinary pseudocode.
-
-This means:
-
-- `spec` remains primary
-- `fn` is secondary and usually interpreted
-- `quasi` is allowed for steering, not for replacing the contract language
+see [l1_syntax.md](./l1//l1_syntax.md)
 
 ## Level 2
 
@@ -474,7 +351,6 @@ For now, the exact keyword inventory should be treated as:
 - `spec`
 - `requires`
 - `ensures`
-- `define`
 - `open`
 - `quasi`
 - `choose`
@@ -496,6 +372,7 @@ For now, the exact keyword inventory should be treated as:
 - `morph`
 - `theorem`
 - `impl`
+- `define`
 
 This is a compact and defensible split.
 It keeps `l1` centered on relations, types, and contracts, while making `l2` a true canonical semantic layer rather than a more decorated version of `l1`.
