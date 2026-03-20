@@ -1,30 +1,54 @@
 type Set
 
 rel Member(x: Set, s: Set)
-
 rel Empty(s: Set)
 rel Subset(a: Set, b: Set)
 rel Infinite(s: Set)
-rel Finite(s: Set)
+rel Pair(a: Set, b: Set, p: Set)
+rel UnionOf(s: Set, u: Set)
+rel PowerOf(a: Set, p: Set)
 
 syntax x in s where x: Set, s: Set implies Member(x, s)
 syntax x subsetof y where x: Set, y: Set implies Subset(x, y)
 
-# ZFC axioms are defined as following:
+# Definition of empty set
 spec empty_def
     must forall s: Set .
         Empty(s) iff forall x: Set . not x in s
 
+# Definition of subset
 spec subset_def
     must forall a: Set, b: Set .
         a subsetof b iff forall x: Set . x in a implies x in b
 
-spec empty_set_exists
-    must exists s: Set . Empty(s)
-
+# Axiom of extensionality
 spec extensionality
     must forall a: Set, b: Set .
         (forall x: Set . x in a iff x in b) implies a = b
 
+# Axiom of empty set
+spec empty_set_exists
+    must exists s: Set . Empty(s)
+
+# Axiom of pairing
+spec pairing
+    must forall a: Set, b: Set .
+        exists p: Set .
+            forall x: Set . x in p iff (x = a or x = b)
+
+# Axiom of union
+spec union
+    must forall s: Set .
+        exists u: Set .
+            forall x: Set .
+                x in u iff exists y: Set . y in s and x in y
+
+# Axiom of power set
+spec power_set
+    must forall a: Set .
+        exists p: Set .
+            forall x: Set . x in p iff x subsetof a
+
+# Axiom of infinity
 spec infinite_set_exists
     must exists s: Set . Infinite(s)

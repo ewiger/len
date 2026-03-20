@@ -1,9 +1,54 @@
 type Nat
 
+rel Zero(n: Nat)
+rel Successor(n: Nat, m: Nat)
+
+rel Finite(s: Set)
 rel Size(s: Set, n: Nat)
 
+syntax succ(n) = m where n: Nat, m: Nat implies Successor(n, m)
 syntax |s| = n where s: Set, n: Nat implies Size(s, n)
 
-spec finite_size_defined
+# Peano-style property of zero
+spec zero_exists
+    must exists n: Nat . Zero(n)
+
+# Peano-style property of unique zero
+spec zero_unique
+    must forall a: Nat, b: Nat .
+        (Zero(a) and Zero(b)) implies a = b
+
+# Peano-style property of successor closure
+spec successor_exists
+    must forall n: Nat .
+        exists m: Nat . Successor(n, m)
+
+# Peano-style property of successor uniqueness
+spec successor_unique
+    must forall n: Nat, a: Nat, b: Nat .
+        (Successor(n, a) and Successor(n, b)) implies a = b
+
+# Peano-style property of zero is not a successor
+spec zero_not_successor
+    must forall n: Nat .
+        Zero(n) implies not exists m: Nat . Successor(m, n)
+
+# Peano-style property of injective successor
+spec successor_injective
+    must forall a: Nat, b: Nat, c: Nat .
+        (Successor(a, c) and Successor(b, c)) implies a = b
+
+# Property of finite size existence
+spec finite_size_exists
     must forall s: Set .
         Finite(s) implies exists n: Nat . |s| = n
+
+# Property of unique finite size
+spec finite_size_unique
+    must forall s: Set, n: Nat, m: Nat .
+        (Size(s, n) and Size(s, m)) implies n = m
+
+# Property of size implying finiteness
+spec size_implies_finite
+    must forall s: Set, n: Nat .
+        Size(s, n) implies Finite(s)
