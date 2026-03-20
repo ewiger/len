@@ -1,15 +1,14 @@
 import core.math.set
 
-type fn
+type Fn
 
-rel Fun(A, B, f)
-rel Injective(f)
-rel Surjective(f)
+rel Fun(A: Set, B: Set, f: Fn)
+rel Injective(f: Fn)
+rel Surjective(f: Fn)
 
-
-spec functions
-    given A, B, f : Set
-
-def BijectiveFun(A, B, f) : rel iff
-    Fun(A, B, f) and Injective(f) and Surjective(f)
-
+# Definition of bijective function
+spec bijective_fun_def
+    given A, B: Set
+    given f: Fn
+    must BijectiveFun(A, B, f) iff
+        Fun(A, B, f) and Injective(f) and Surjective(f)

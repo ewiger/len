@@ -1,6 +1,6 @@
 # Meta-language hints used together with `syntax`.
 type Expr
-type Formula
+type FormulaExpr
 type TypeExpr
 type RelExpr
 

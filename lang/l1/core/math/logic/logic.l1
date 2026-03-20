@@ -1,7 +1,8 @@
-import type Expr from core.syntax
-import type Formula from core.syntax
-
 type Bool
+type Formula
+type Relation import from core.types
+type Type import from core.types
+
 
 syntax true implies forall b: Bool . b = b
 syntax false implies exists b: Bool . not (b = b)

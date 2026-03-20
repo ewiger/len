@@ -32,9 +32,9 @@ keyword where
 keyword in
 
 # structs
+keyword struct
 keyword trait
 keyword impl
-keyword def
 
 # hints
 keyword quasi
