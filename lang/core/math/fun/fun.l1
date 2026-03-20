@@ -1,0 +1,15 @@
+import core.math.set
+
+type fn
+
+rel Fun(A, B, f)
+rel Injective(f)
+rel Surjective(f)
+
+
+spec functions
+    given A, B, f : Set
+
+def BijectiveFun(A, B, f) : rel iff
+    Fun(A, B, f) and Injective(f) and Surjective(f)
+

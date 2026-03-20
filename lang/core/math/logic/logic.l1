@@ -1,0 +1,3 @@
+import type Expr from core.syntax
+
+syntax Expr => Expr implies Expr implies Expr
