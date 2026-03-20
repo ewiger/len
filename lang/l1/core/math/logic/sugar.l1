@@ -1,0 +1,12 @@
+# Note that true/false are implemented as constants in logic.l1
+# syntax true implies forall b: Bool . b = b
+# syntax false implies exists b: Bool . not (b = b)
+
+syntax A => B where A: Formula, B: Formula implies A implies B
+syntax A <=> B where A: Formula, B: Formula implies A iff B
+syntax A /\ B where A: Formula, B: Formula implies A and B
+syntax A \/ B where A: Formula, B: Formula implies A or B
+syntax !A where A: Formula implies not A
+
+syntax any x: T . P where x: Expr, T: Expr, P: Formula implies forall x: T . P
+syntax some x: T . P where x: Expr, T: Expr, P: Formula implies exists x: T . P

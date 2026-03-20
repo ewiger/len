@@ -1,17 +1,95 @@
 type Bool
 type Formula
+type Expr
+type Context
+type Value
+
 type Relation import from core.types
 type Type import from core.types
 
+const True : Bool
+const False : Bool
 
-syntax true implies forall b: Bool . b = b
-syntax false implies exists b: Bool . not (b = b)
+const FormulaTrue : Formula
+const FormulaFalse : Formula
 
-syntax A => B where A: Formula, B: Formula implies A implies B
-syntax A <=> B where A: Formula, B: Formula implies A iff B
-syntax A /\ B where A: Formula, B: Formula implies A and B
-syntax A \/ B where A: Formula, B: Formula implies A or B
-syntax !A where A: Formula implies not A
+rel Eval(ctx: Context, f: Formula, b: Bool)
+rel Holds(ctx: Context, f: Formula)
+rel Extend(ctx: Context, x: Expr, v: Value, next: Context)
+rel Inhabits(v: Value, t: Expr)
 
-syntax any x: T . P where x: Expr, T: Expr, P: Formula implies forall x: T . P
-syntax some x: T . P where x: Expr, T: Expr, P: Formula implies exists x: T . P
+spec holds_def
+    given ctx: Context
+    given f: Formula
+    must Holds(ctx, f) iff Eval(ctx, f, True)
+
+spec eval_true_def
+    given ctx: Context
+    must Eval(ctx, FormulaTrue, True)
+
+spec eval_false_def
+    given ctx: Context
+    must Eval(ctx, FormulaFalse, False)
+
+spec eval_not_def
+    given ctx: Context
+    given a: Formula
+    must Eval(ctx, not a, True) iff Eval(ctx, a, False)
+
+spec eval_and_def
+    given ctx: Context
+    given a, b: Formula
+    must Eval(ctx, a and b, True) iff
+        Eval(ctx, a, True) and Eval(ctx, b, True)
+
+spec eval_or_def
+    given ctx: Context
+    given a, b: Formula
+    must Eval(ctx, a or b, True) iff
+        Eval(ctx, a, True) or Eval(ctx, b, True)
+
+spec eval_implies_def
+    given ctx: Context
+    given a, b: Formula
+    must Eval(ctx, a implies b, True) iff
+        Eval(ctx, a, False) or Eval(ctx, b, True)
+
+spec eval_iff_def
+    given ctx: Context
+    given a, b: Formula
+    must Eval(ctx, a iff b, True) iff
+        (Eval(ctx, a, True) and Eval(ctx, b, True)) or
+        (Eval(ctx, a, False) and Eval(ctx, b, False))
+
+spec extend_intro
+    given ctx: Context
+    given x: Expr
+    given v: Value
+    must exists next: Context . Extend(ctx, x, v, next)
+
+spec extend_deterministic
+    given ctx: Context
+    given x: Expr
+    given v: Value
+    given next1, next2: Context
+    must Extend(ctx, x, v, next1) and Extend(ctx, x, v, next2) implies next1 = next2
+
+spec eval_forall_def
+    given ctx: Context
+    given x, t: Expr
+    given p: Formula
+    must Eval(ctx, forall x: t . p, True) iff
+        forall v: Value .
+            Inhabits(v, t) implies
+            exists next: Context .
+                Extend(ctx, x, v, next) and Eval(next, p, True)
+
+spec eval_exists_def
+    given ctx: Context
+    given x, t: Expr
+    given p: Formula
+    must Eval(ctx, exists x: t . p, True) iff
+        exists v: Value .
+            Inhabits(v, t) and
+            exists next: Context .
+                Extend(ctx, x, v, next) and Eval(next, p, True)
