@@ -1,0 +1,9 @@
+type Nat
+
+rel Size(s: Set, n: Nat)
+
+syntax |s| = n where s: Set, n: Nat implies Size(s, n)
+
+spec finite_size_defined
+    must forall s: Set .
+        Finite(s) implies exists n: Nat . |s| = n

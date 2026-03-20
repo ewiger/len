@@ -1,0 +1,30 @@
+type Set
+
+rel Member(x: Set, s: Set)
+
+rel Empty(s: Set)
+rel Subset(a: Set, b: Set)
+rel Infinite(s: Set)
+rel Finite(s: Set)
+
+syntax x in s where x: Set, s: Set implies Member(x, s)
+syntax x subsetof y where x: Set, y: Set implies Subset(x, y)
+
+# ZFC axioms are defined as following:
+spec empty_def
+    must forall s: Set .
+        Empty(s) iff forall x: Set . not x in s
+
+spec subset_def
+    must forall a: Set, b: Set .
+        a subsetof b iff forall x: Set . x in a implies x in b
+
+spec empty_set_exists
+    must exists s: Set . Empty(s)
+
+spec extensionality
+    must forall a: Set, b: Set .
+        (forall x: Set . x in a iff x in b) implies a = b
+
+spec infinite_set_exists
+    must exists s: Set . Infinite(s)
