@@ -1,6 +1,7 @@
 # First-class primitive types
 type Type
 type Relation
+type Formula
 
 rel Subtype(A, B)
 

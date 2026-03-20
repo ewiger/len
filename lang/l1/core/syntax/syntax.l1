@@ -1,5 +1,8 @@
 # meta language features like `Expr`, `Type` and `Relation` are to be used in conjuction with keyword `syntax`
 type Expr
+type Formula
+
+# claim that a Subtype(A, B) iff A: Formula and B: Expr
 
 # Identifier-level reflection for the surface grammar.
 # These are lexical classes and naming conventions, not semantic categories.

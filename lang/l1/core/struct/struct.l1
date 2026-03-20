@@ -1,0 +1,3 @@
+trait Struct
+
+impl Set : Struct

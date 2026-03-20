@@ -6,7 +6,7 @@
 
 Core len.l1 consists of two main parts:
 
-- **core.syntax** = meta-language tokens and open-ended expression carrier
+- **core.syntax** = meta-language tokens plus core carriers such as `Expr`, `Type`, `Relation`, and `Formula`
 
 - **core.math.logic.logic** = human-facing logical aliases built on top of len.l1 core connectives
 

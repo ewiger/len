@@ -17,6 +17,8 @@ keyword must
 # logical formulas
 keyword forall
 keyword exists
+keyword true
+keyword false
 keyword and
 keyword or
 keyword not
