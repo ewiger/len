@@ -3,6 +3,7 @@ type Formula
 type Expr
 type Context
 type Value
+type Args
 
 type Relation import from core.types
 type Type import from core.types
@@ -17,6 +18,10 @@ rel Eval(ctx: Context, f: Formula, b: Bool)
 rel Holds(ctx: Context, f: Formula)
 rel Extend(ctx: Context, x: Expr, v: Value, next: Context)
 rel Inhabits(v: Value, t: Expr)
+
+rel EvalExpr(ctx: Context, e: Expr, v: Value)
+rel EvalArgs(ctx: Context, xs: Expr, args: Args)
+rel Satisfies(ctx: Context, r: Relation, args: Args)
 
 spec holds_def
     given ctx: Context
@@ -93,3 +98,18 @@ spec eval_exists_def
             Inhabits(v, t) and
             exists next: Context .
                 Extend(ctx, x, v, next) and Eval(next, p, True)
+
+spec eval_relation_def
+    given ctx: Context
+    given r: Relation
+    given xs: Expr
+    must Eval(ctx, r(xs), True) iff
+        exists args: Args .
+            EvalArgs(ctx, xs, args) and Satisfies(ctx, r, args)
+
+spec eval_type_pred_def
+    given ctx: Context
+    given t: Expr
+    must Eval(ctx, Type(t), True) iff
+        exists v: Value .
+            EvalExpr(ctx, t, v) and Inhabits(v, Type)
