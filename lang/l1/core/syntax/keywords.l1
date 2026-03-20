@@ -1,15 +1,20 @@
 # A complete list of reserved keywords for level 1 of `len` language
+
+# first-class primitives
 keyword type
 keyword rel
 
+# synatx
 keyword syntax
 keyword keyword
 keyword symbol
 keyword implies
 
+# namespaces
 keyword import
 keyword from
 
+# rules
 keyword spec
 keyword given
 keyword must
@@ -26,8 +31,10 @@ keyword iff
 keyword where
 keyword in
 
+# structs
 keyword trait
 keyword impl
 keyword def
 
+# hints
 keyword quasi
