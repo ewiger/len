@@ -1,3 +1,10 @@
 import type Expr from core.syntax
 
-syntax Expr => Expr implies Expr implies Expr
+syntax A => B where A: Expr, B: Expr implies A implies B
+syntax A <=> B where A: Expr, B: Expr implies A iff B
+syntax A /\ B where A: Expr, B: Expr implies A and B
+syntax A \/ B where A: Expr, B: Expr implies A or B
+syntax !A where A: Expr implies not A
+
+syntax any x: T . P where x: Expr, T: Expr, P: Expr implies forall x: T . P
+syntax some x: T . P where x: Expr, T: Expr, P: Expr implies exists x: T . P

@@ -1,26 +1,15 @@
-# meta language features like `Expr` are to be used in conjuction with keyword `syntax`
+# meta language features like `Expr`, `Type` and `Relation` are to be used in conjuction with keyword `syntax`
 type Expr
 
-# A complete list of reserved keywords for level 1 of `len` language
-
-keyword type
-keyword rel
-keyword syntax
-keyword keyword
-keyword implies
-keyword import
-keyword trait
-keyword impl
-keyword def
-keyword spec
-keyword given
-keyword must
-keyword forall
-keyword exists
-keyword and
-keyword or
-keyword not
-keyword iff
-keyword where
-keyword from
-keyword in
+# Identifier-level reflection for the surface grammar.
+# These are lexical classes and naming conventions, not semantic categories.
+expr IDENT as "[A-Za-z_][A-Za-z0-9_]*"
+# Type and relation names currently share the same lexical shape.
+# Their category is determined by declaration context, not spelling alone.
+expr TYPE_ID as "[A-Z][A-Za-z0-9_]*"
+expr REL_ID as "[A-Z][A-Za-z0-9_]*" # capitalized identifier, e.g. Member or PowerOf
+expr VAR_ID as "[a-z][A-Za-z0-9_]*"
+expr DEF_ID as "[a-z][A-Za-z0-9_]*"
+expr SPEC_ID as "[a-z][a-z0-9_]*(?:_[a-z0-9_]+)*"
+expr MODULE_SEGMENT as "[a-z][a-z0-9_]*"
+expr QUALIFIED_ID as "[a-z][A-Za-z0-9_]*(?:\.[a-z][A-Za-z0-9_]*)*"

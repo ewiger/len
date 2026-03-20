@@ -1,0 +1,13 @@
+# First-class primitive types
+type Type
+type Relation
+
+rel Subtype(A, B)
+
+spec subtype_reflexive
+    must forall A: Type .
+        Subtype(A, A)
+
+spec subtype_transitive
+    must forall A: Type, B: Type, C: Type .
+        (Subtype(A, B) and Subtype(B, C)) implies Subtype(A, C)
