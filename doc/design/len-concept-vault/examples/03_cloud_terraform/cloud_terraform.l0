@@ -1,9 +1,0 @@
-Provision a cloud service for an application.
-
-The deployment must place compute in an approved region.
-The database and application must use the same environment label.
-Public ingress is allowed only for the load balancer, never for the database.
-Every requested resource must be validated before apply.
-
-If the plan passes validation, the deployment can proceed.
-

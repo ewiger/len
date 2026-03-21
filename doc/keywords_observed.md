@@ -23,7 +23,6 @@ These are explicitly declared in [lang/core/syntax/syntax.l1](/Users/yy/code/len
 - `keyword`
 - `trait`
 - `impl`
-- `def`
 - `spec`
 - `given`
 - `must`
