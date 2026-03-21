@@ -1,0 +1,18 @@
+# Meta-language hints used together with `syntax`.
+type Expr
+type FormulaExpr
+type TypeExpr
+type RelExpr
+
+# Name-like and reference-like surface categories.
+type Identifier
+type QualifiedName
+type ModulePath
+
+# Open-ended semantic hints about expression roles.
+rel FormulaExpr(x: Expr)
+rel TypeLike(x: Expr)
+rel RelationLike(x: Expr)
+rel IdentifierLike(x: Expr)
+rel QualifiedLike(x: Expr)
+rel ModuleLike(x: Expr)

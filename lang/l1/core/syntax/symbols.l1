@@ -1,0 +1,17 @@
+# `Expr` building symbols used by surface syntax (essential for the meta grammar)
+symbol DOT as "."
+symbol COLON as ":"
+symbol OPEN_PARENTHESIS as "("
+symbol CLOSE_PARENTHESIS as ")"
+symbol COMMA as ","
+
+symbol EQUALS as "="
+symbol LT as "<"
+symbol GT as ">"
+symbol PIPE as "|"
+symbol DIV as "/"
+symbol ESCAPE as "\"
+symbol MUL as "*"
+symbol ADD as "+"
+symbol MINUS as "-"
+symbol EXCLAMATION "!"

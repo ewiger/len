@@ -1,8 +1,0 @@
-The system defines factorial as a relation between an input number and an output number.
-
-For zero, the result must be one.
-For any positive n, factorial(n) is n times factorial(n minus one).
-Any published answer for factorial must satisfy the base rule and the step rule.
-
-If we ask for factorial of five, the returned result should be one hundred twenty.
-

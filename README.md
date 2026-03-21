@@ -8,5 +8,9 @@ It is intended for writing programs that generate, transform, or reason about ot
 
 This project is **early-stage and experimental**.
 
-- Language design and notes live under `doc/design/len-concept-vault/`.
 - Expect breaking changes to syntax, semantics, and tooling.
+- The core language and features are still being designed and implemented but you can check out `lang/l1/**`.
+
+## Notes
+
+Level 1 defines the canonical structural core of len: types, relations, formulas, and syntax-level logical constructs. It is intentionally lightweight and declarative. Level 2 builds on this core by introducing interpretation and evaluation, such as contexts, satisfaction, and executable semantic rules.

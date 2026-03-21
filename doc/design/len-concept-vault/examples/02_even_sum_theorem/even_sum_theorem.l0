@@ -1,7 +1,0 @@
-We want a theorem-style example.
-
-If a is even and b is even, then their sum must also be even.
-An even number is any number equal to double of some integer.
-
-The specification should make the witness explicit: if a and b are even, there exists a k such that add(a, b) equals double(k).
-

@@ -1,7 +1,0 @@
-Define a backup policy for production data.
-
-Every production dataset must have a daily backup.
-Backups must be encrypted and retained for at least thirty days.
-Restore validation must succeed for every critical dataset.
-If a dataset is marked temporary, the policy may leave it open.
-

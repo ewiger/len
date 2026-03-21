@@ -1,0 +1,40 @@
+# A complete list of reserved keywords for level 1 of `len` language
+
+# first-class primitives
+keyword type
+keyword rel
+
+# synatx
+keyword syntax
+keyword keyword
+keyword symbol
+keyword implies
+
+# namespaces
+keyword import
+keyword from
+
+# rules
+keyword spec
+keyword given
+keyword must
+
+# logical formulas
+keyword forall
+keyword exists
+keyword true
+keyword false
+keyword and
+keyword or
+keyword not
+keyword iff
+keyword where
+keyword in
+
+# structs
+keyword struct
+keyword trait
+keyword impl
+
+# hints
+keyword quasi
