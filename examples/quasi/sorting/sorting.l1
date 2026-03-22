@@ -1,0 +1,26 @@
+type Int
+type Elem
+type Seq
+
+rel Index(s: Seq, i: Int)
+rel At(s: Seq, i: Int, x: Elem)
+rel Length(s: Seq, n: Int)
+
+rel Leq(x: Elem, y: Elem)
+
+rel Sorted(s: Seq)
+rel Permutation(a: Seq, b: Seq)
+rel Sort(input: Seq, output: Seq)
+
+spec sorted_def
+    given s: Seq
+    must Sorted(s) iff
+        forall i: Int, j: Int .
+            Index(s, i) and Index(s, j) and i < j implies
+                forall xi: Elem, xj: Elem .
+                    At(s, i, xi) and At(s, j, xj) implies Leq(xi, xj)
+
+spec sort_def
+    given input, output: Seq
+    must Sort(input, output) iff
+        Sorted(output) and Permutation(input, output)

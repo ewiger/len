@@ -16,3 +16,7 @@ rel RelationLike(x: Expr)
 rel IdentifierLike(x: Expr)
 rel QualifiedLike(x: Expr)
 rel ModuleLike(x: Expr)
+rel Equals(x: Expr, y: Expr)
+
+syntax x equals y where x: Expr, y: Expr implies Equals(x, y)
+syntax x = y where x: Expr, y: Expr implies x equals y

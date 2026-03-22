@@ -1,0 +1,6 @@
+type Seq
+rel Sorted(s: Seq)
+
+spec broken
+    given input: Seq
+    must Missing(input)

@@ -1,0 +1,8 @@
+type String
+rel Hello(output: String)
+
+fn hello() -> output: String
+    ensures Hello(output)
+    quasi using style ProceduralAlgorithm:
+        let greeting := "Hello, world!"
+        return greeting

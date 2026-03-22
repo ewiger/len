@@ -3,10 +3,12 @@
 # first-class primitives
 keyword type
 keyword rel
+keyword const
+keyword fn
+keyword contract
 
-# synatx
+# syntax
 keyword syntax
-keyword keyword
 keyword symbol
 keyword implies
 
@@ -18,6 +20,9 @@ keyword from
 keyword spec
 keyword given
 keyword must
+keyword requires
+keyword ensures
+keyword implements
 
 # logical formulas
 keyword forall
@@ -33,8 +38,6 @@ keyword in
 
 # structs
 keyword struct
-keyword trait
-keyword impl
 
 # hints
 keyword quasi

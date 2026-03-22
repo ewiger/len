@@ -1,0 +1,46 @@
+rel MergeSort(input: Seq, output: Seq)
+
+spec merge_sort_correct
+    given input: Seq
+    given output: Seq
+    must MergeSort(input, output) implies
+        Sorted(output) and Permutation(input, output)
+
+fn merge_sort(input: Seq) -> output: Seq
+    implements MergeSort(input, output)
+    ensures Sorted(output)
+    ensures Permutation(input, output)
+    quasi using style ProceduralAlgorithm:
+        let xs := input
+
+        if length(xs) <= 1:
+            return xs
+
+        let mid := length(xs) / 2
+        let left := slice(xs, 0, mid)
+        let right := slice(xs, mid, length(xs))
+
+        let sorted_left := merge_sort(left)
+        let sorted_right := merge_sort(right)
+
+        let result := []
+        let i := 0
+        let j := 0
+
+        while i < length(sorted_left) and j < length(sorted_right):
+            if sorted_left[i] <= sorted_right[j]:
+                append sorted_left[i] to result
+                set i := i + 1
+            else:
+                append sorted_right[j] to result
+                set j := j + 1
+
+        while i < length(sorted_left):
+            append sorted_left[i] to result
+            set i := i + 1
+
+        while j < length(sorted_right):
+            append sorted_right[j] to result
+            set j := j + 1
+
+        return result

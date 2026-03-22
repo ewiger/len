@@ -1,0 +1,13 @@
+Problem statement
+Sort a finite sequence using BubbleSort.
+
+Expected input
+A finite sequence of comparable elements.
+
+Expected output
+A sequence that is sorted and is a permutation of the input.
+
+Procedure
+Scan adjacent positions from left to right.
+When a neighboring pair is out of order, swap it.
+Repeat passes until no swap is needed.

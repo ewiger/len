@@ -1,0 +1,14 @@
+Problem statement
+Sort a finite sequence using MergeSort.
+
+Expected input
+A finite sequence of comparable elements.
+
+Expected output
+A sequence that is sorted and is a permutation of the input.
+
+Procedure
+Split the input into a left half and a right half.
+Recursively sort the left half.
+Recursively sort the right half.
+Merge both sorted halves into a single result.

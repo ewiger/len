@@ -1,0 +1,15 @@
+Problem statement
+Sort a finite sequence using QuickSort.
+
+Expected input
+A finite sequence of comparable elements.
+
+Expected output
+A sequence that is sorted and is a permutation of the input.
+
+Procedure
+Choose a pivot from the input.
+Partition the input into smaller, equal, and greater parts.
+Recursively sort the smaller part.
+Recursively sort the greater part.
+Concatenate the sorted smaller part, equal part, and sorted greater part.
