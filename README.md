@@ -44,6 +44,27 @@ Run all unit tests:
 make test
 ```
 
+Build the language docs into `doc/lang-html`:
+
+```bash
+make docs
+```
+
+Run a live preview server for `doc/lang/**`:
+
+```bash
+make docs-serve
+```
+
+If `mkdocs` is not installed yet:
+
+```bash
+python3 -m pip install -r requirements-docs.txt
+```
+
+To publish the docs with GitHub Pages, enable **Settings > Pages > Build and deployment > Source: GitHub Actions**.
+The workflow in `.github/workflows/docs-pages.yml` will build the site from `doc/lang/**` and deploy it on pushes to `main` or `master`, and it can also be run manually.
+
 Run the validator on the hello world example:
 
 ```bash
