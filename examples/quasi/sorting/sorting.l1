@@ -14,11 +14,108 @@ rel Sort(input: Seq, output: Seq)
 
 rel BubbleSort(input: Seq, output: Seq)
 rel InsertionSort(input: Seq, output: Seq)
+rel MergeSort(input: Seq, output: Seq)
 rel QuickSort(input: Seq, output: Seq)
 
-fn bubble_sort(input: Seq) -> Seq
-fn insertion_sort(input: Seq) -> Seq
-fn quick_sort(input: Seq) -> Seq
+fn bubble_sort(input: Seq) -> output: Seq
+    ensures BubbleSort(input, output)
+    quasi using style ProceduralAlgorithm:
+        let xs := input
+        let n := length(xs)
+        let changed := true
+
+        while changed:
+            set changed := false
+
+            for i in 0 .. n - 2:
+                if xs[i] > xs[i + 1]:
+                    let tmp := xs[i]
+                    set xs[i] := xs[i + 1]
+                    set xs[i + 1] := tmp
+                    set changed := true
+
+        return xs
+
+fn insertion_sort(input: Seq) -> output: Seq
+    ensures InsertionSort(input, output)
+    quasi using style ProceduralAlgorithm:
+        let xs := input
+        let n := length(xs)
+
+        for i in 1 .. n - 1:
+            let key := xs[i]
+            let j := i - 1
+
+            while j >= 0 and xs[j] > key:
+                set xs[j + 1] := xs[j]
+                set j := j - 1
+
+            set xs[j + 1] := key
+
+        return xs
+
+fn merge_sort(input: Seq) -> output: Seq
+    ensures MergeSort(input, output)
+    quasi using style ProceduralAlgorithm:
+        let xs := input
+
+        if length(xs) <= 1:
+            return xs
+
+        let mid := length(xs) / 2
+        let left := slice(xs, 0, mid)
+        let right := slice(xs, mid, length(xs))
+
+        let sorted_left := merge_sort(left)
+        let sorted_right := merge_sort(right)
+
+        let result := []
+        let i := 0
+        let j := 0
+
+        while i < length(sorted_left) and j < length(sorted_right):
+            if sorted_left[i] <= sorted_right[j]:
+                append sorted_left[i] to result
+                set i := i + 1
+            else:
+                append sorted_right[j] to result
+                set j := j + 1
+
+        while i < length(sorted_left):
+            append sorted_left[i] to result
+            set i := i + 1
+
+        while j < length(sorted_right):
+            append sorted_right[j] to result
+            set j := j + 1
+
+        return result
+
+fn quick_sort(input: Seq) -> output: Seq
+    ensures QuickSort(input, output)
+    quasi using style ProceduralAlgorithm:
+        let xs := input
+
+        if length(xs) <= 1:
+            return xs
+
+        let pivot := xs[length(xs) / 2]
+        let left := []
+        let equal := []
+        let right := []
+
+        for x in xs:
+            if x < pivot:
+                append x to left
+            else if x = pivot:
+                append x to equal
+            else:
+                append x to right
+
+        let sorted_left := quick_sort(left)
+        let sorted_right := quick_sort(right)
+
+        return concat(sorted_left, equal, sorted_right)
 
 spec sorted_def
     given s: Seq
@@ -41,6 +138,10 @@ spec insertion_sort_correct
     given input, output: Seq
     must InsertionSort(input, output) implies Sort(input, output)
 
+spec merge_sort_correct
+    given input, output: Seq
+    must MergeSort(input, output) implies Sort(input, output)
+
 spec quick_sort_correct
     given input, output: Seq
     must QuickSort(input, output) implies Sort(input, output)
@@ -54,6 +155,11 @@ spec insertion_sort_fun
     given input: Seq
     given output: Seq
     must output = insertion_sort(input) implies InsertionSort(input, output)
+
+spec merge_sort_fun
+    given input: Seq
+    given output: Seq
+    must output = merge_sort(input) implies MergeSort(input, output)
 
 spec quick_sort_fun
     given input: Seq

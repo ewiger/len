@@ -1,0 +1,13 @@
+Problem statement
+Sort a finite sequence using InsertionSort.
+
+Expected input
+A finite sequence of comparable elements.
+
+Expected output
+A sequence that is sorted and is a permutation of the input.
+
+Procedure
+Treat the part before the current position as a sorted prefix.
+Shift larger prefix elements to the right.
+Place the current element into the open position.

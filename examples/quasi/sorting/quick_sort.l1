@@ -1,21 +1,33 @@
-quasi:
-    if length(xs) <= 1:
-        return xs
+rel QuickSort(input: Seq, output: Seq)
 
-    let pivot := xs[length(xs) / 2]
-    let left := []
-    let equal := []
-    let right := []
+spec quick_sort_correct
+    given input: Seq
+    given output: Seq
+    must QuickSort(input, output) implies
+        Sorted(output) and Permutation(input, output)
 
-    for x in xs:
-        if x < pivot:
-            append x to left
-        else if x = pivot:
-            append x to equal
-        else:
-            append x to right
+fn quick_sort(input: Seq) -> output: Seq
+    ensures QuickSort(input, output)
+    quasi using style ProceduralAlgorithm:
+        let xs := input
 
-    let sorted_left := quick_sort(left)
-    let sorted_right := quick_sort(right)
+        if length(xs) <= 1:
+            return xs
 
-    return concat(sorted_left, equal, sorted_right)
+        let pivot := xs[length(xs) / 2]
+        let left := []
+        let equal := []
+        let right := []
+
+        for x in xs:
+            if x < pivot:
+                append x to left
+            else if x = pivot:
+                append x to equal
+            else:
+                append x to right
+
+        let sorted_left := quick_sort(left)
+        let sorted_right := quick_sort(right)
+
+        return concat(sorted_left, equal, sorted_right)

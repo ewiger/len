@@ -3,12 +3,11 @@
 
 ```len.l1
 
-fn hello() -> output: String {
+fn hello() -> output: String
     quasi using style ProceduralAlgorithm:
         let greeting := "Hello, "
         let name := "world!"
         output := greeting + name
-}
 
 ```
 

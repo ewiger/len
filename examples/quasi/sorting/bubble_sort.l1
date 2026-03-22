@@ -8,7 +8,8 @@ spec bubble_sort_correct
 
 fn bubble_sort(input: Seq) -> output: Seq
     ensures BubbleSort(input, output)
-    quasi:
+    quasi using style ProceduralAlgorithm:
+        let xs := input
         let n := length(xs)
         let changed := true
 

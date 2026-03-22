@@ -1,14 +1,25 @@
-quasi:
-    let n := length(xs)
+rel InsertionSort(input: Seq, output: Seq)
 
-    for i in 1 .. n - 1:
-        let key := xs[i]
-        let j := i - 1
+spec insertion_sort_correct
+    given input: Seq
+    given output: Seq
+    must InsertionSort(input, output) implies
+        Sorted(output) and Permutation(input, output)
 
-        while j >= 0 and xs[j] > key:
-            set xs[j + 1] := xs[j]
-            set j := j - 1
+fn insertion_sort(input: Seq) -> output: Seq
+    ensures InsertionSort(input, output)
+    quasi using style ProceduralAlgorithm:
+        let xs := input
+        let n := length(xs)
 
-        set xs[j + 1] := key
+        for i in 1 .. n - 1:
+            let key := xs[i]
+            let j := i - 1
 
-    return xs
+            while j >= 0 and xs[j] > key:
+                set xs[j + 1] := xs[j]
+                set j := j - 1
+
+            set xs[j + 1] := key
+
+        return xs
