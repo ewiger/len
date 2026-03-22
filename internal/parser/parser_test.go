@@ -1,0 +1,77 @@
+package parser_test
+
+import (
+	"testing"
+
+	"github.com/yy/len/internal/ast"
+	"github.com/yy/len/internal/parser"
+)
+
+func TestParseFnSpecAndQuasi(t *testing.T) {
+	source := `type Seq
+rel Sorted(s: Seq)
+rel At(s: Seq, i: Seq)
+
+fn bubble_sort(input: Seq) -> output: Seq
+    ensures Sorted(output)
+    quasi using style ProceduralAlgorithm:
+        let xs := input
+        if true:
+            return xs
+
+spec bubble_sort_correct
+    given input, output: Seq
+    must Sorted(output) implies
+        At(output, input)
+`
+
+	file, diags := parser.Parse("sample.l1", source)
+	if len(diags) != 0 {
+		t.Fatalf("Parse returned diagnostics: %#v", diags)
+	}
+	if len(file.Decls) != 4 {
+		t.Fatalf("got %d declarations, want 4", len(file.Decls))
+	}
+	fn, ok := file.Decls[2].(*ast.FnDecl)
+	if !ok {
+		t.Fatalf("third decl = %T, want *ast.FnDecl", file.Decls[2])
+	}
+	if fn.Quasi == nil || fn.Quasi.StyleName != "ProceduralAlgorithm" {
+		t.Fatalf("fn quasi = %#v, want style ProceduralAlgorithm", fn.Quasi)
+	}
+	if len(fn.Quasi.Block.Lines) != 3 {
+		t.Fatalf("quasi lines = %d, want 3", len(fn.Quasi.Block.Lines))
+	}
+	spec, ok := file.Decls[3].(*ast.SpecDecl)
+	if !ok {
+		t.Fatalf("fourth decl = %T, want *ast.SpecDecl", file.Decls[3])
+	}
+	if len(spec.Given) != 2 {
+		t.Fatalf("spec given binders = %d, want 2", len(spec.Given))
+	}
+	if _, ok := spec.Must.(*ast.BinaryExpr); !ok {
+		t.Fatalf("spec must = %T, want *ast.BinaryExpr", spec.Must)
+	}
+}
+
+func TestParseSyntaxAndQuantifier(t *testing.T) {
+	source := `type Int
+type Seq
+syntax x in s where x: Int, s: Seq implies Member(x, s)
+spec ordered
+    given s: Seq
+    must forall i: Int, j: Int . i < j implies Member(i, s)
+`
+
+	file, diags := parser.Parse("sample.l1", source)
+	if len(diags) != 0 {
+		t.Fatalf("Parse returned diagnostics: %#v", diags)
+	}
+	if _, ok := file.Decls[2].(*ast.SyntaxDecl); !ok {
+		t.Fatalf("third decl = %T, want *ast.SyntaxDecl", file.Decls[2])
+	}
+	spec := file.Decls[3].(*ast.SpecDecl)
+	if _, ok := spec.Must.(*ast.QuantifiedExpr); !ok {
+		t.Fatalf("must = %T, want quantified expression", spec.Must)
+	}
+}
