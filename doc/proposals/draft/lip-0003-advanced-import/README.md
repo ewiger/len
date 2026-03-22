@@ -17,6 +17,8 @@
 
 This proposal defines how members of a `contract` are referenced after contract instantiation and how those members should be brought into local scope.
 
+Essentially, contracts are also namespace containers. A contract does not only introduce a contract proposition; it also introduces a member namespace that becomes concrete when the contract is instantiated.
+
 The key rule is that an instantiated contract proposition such as `Eq(Point)` acts as a namespace container for its members. If `contract Eq(T: Type)` declares `rel Equal(x: T, y: T)`, then `Eq(Point).Equal` is the fully qualified member relation specialized to `Point`.
 
 That fully qualified form is semantically valid, but it is not the preferred formula surface. In `spec` and other formula contexts, dotted member predicates such as `Eq(Point).Equal(p, p)` are treated as an anti-pattern. The preferred style is to import the member into a local alias and then use the local name directly.
@@ -72,6 +74,11 @@ If the language leaves this area vague, tooling and human style will drift apart
 ## Proposed Changes
 
 ### 1. Instantiated Contracts Are Namespace Containers
+
+At the surface level, a `contract` should be understood as doing two jobs at once:
+
+- introducing a contract proposition
+- introducing a namespace container for the members declared in the contract body
 
 For a contract declaration such as:
 
