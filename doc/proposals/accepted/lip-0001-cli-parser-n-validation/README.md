@@ -100,7 +100,7 @@ The preferred `fn` direction is function-like:
 - parameter list in the header
 - optional result binder after `->`
 - contract clauses such as `requires`, `ensures`, and `implements`
-- optional embedded `quasi:` block for an algorithm sketch or proof-oriented implementation outline
+- required embedded `quasi:` block for an algorithm sketch or proof-oriented implementation outline
 - optional explicit style marker such as `quasi using style ProceduralAlgorithm:`
 - quasi bodies are captured as raw indented text and validated later against a style profile rather than fully parsed by the host grammar
 

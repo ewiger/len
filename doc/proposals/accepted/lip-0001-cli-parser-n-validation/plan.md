@@ -128,7 +128,7 @@ Define a canonical AST for the current parser scope.
 ### Steps
 
 1. add top-level declaration nodes for `import`, `type`, `rel`, `fn`, `const`, `spec`, `syntax`, `trait`, `impl`, `keyword`, and `symbol`
-2. extend `fn` nodes with signature information, result binders, contract clauses such as `requires`, `ensures`, and `implements`, and an optional embedded raw `QUASI_BLOCK` plus optional style metadata for quasi blocks
+2. extend `fn` nodes with signature information, result binders, contract clauses such as `requires`, `ensures`, and `implements`, and a required embedded raw `QUASI_BLOCK` plus optional style metadata for quasi blocks
 3. represent a quasi block as raw lines, indentation metadata, and source spans rather than as a fully parsed statement AST
 4. add expression nodes for identifiers, qualified names, applications, equality, infix expressions, unary expressions, quantifiers, and grouped expressions
 5. add explicit nodes for comments and docstrings only if the parser needs to preserve them for tooling
@@ -155,7 +155,7 @@ Parse declarations and formulas from the current corpus.
 
 1. parse top-level declarations in source order
 2. parse `spec` with zero or more `given` clauses followed by one `must` clause
-3. parse `fn` with a signature, optional result binder, contract clauses such as `requires`, `ensures`, and `implements`, and an optional embedded `quasi` clause with optional `using style <Name>` header metadata
+3. parse `fn` with a signature, optional result binder, contract clauses such as `requires`, `ensures`, and `implements`, and a required embedded `quasi` clause with optional `using style <Name>` header metadata
 4. parse `syntax` declarations as surface form, binder list, and canonical form
 5. capture embedded quasi bodies as indentation-sensitive raw `QUASI_BLOCK` regions using a dedicated block routine in the main parser, without parsing style-internal statements
 6. implement precedence-based expression parsing
@@ -225,7 +225,7 @@ Validate semantic well-formedness after parse.
 4. validate binder scope in formulas
 5. validate unresolved references in `syntax` and, where enabled, in host expressions or formulas captured from quasi style rules
 6. validate `spec` structure and required `must` clause
-7. validate `fn` structure, including contract clauses, result binders, quasi header correctness, and style-profile conformance when a quasi block is present
+7. validate `fn` structure, including contract clauses, result binders, required quasi presence, quasi header correctness, and style-profile conformance
 8. surface-validate raw quasi blocks by resolving the declared style, applying its profile, and reporting lexical or structural diagnostics with source spans
 
 ## Phase 8: CLI Wiring

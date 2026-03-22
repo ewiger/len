@@ -117,7 +117,7 @@ type SpecDecl struct {
 func (d *SpecDecl) declNode()          {}
 func (d *SpecDecl) GetSpan() diag.Span { return d.Span }
 
-// FnDecl models a function-like declaration with an optional quasi body.
+// FnDecl models a function-like declaration with a required quasi body.
 type FnDecl struct {
 	Name    string
 	Params  []Binder

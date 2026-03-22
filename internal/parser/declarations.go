@@ -258,6 +258,7 @@ func (p *parser) parseFnDecl(header sourceLine) ast.Decl {
 	}
 
 	end := header
+	sawQuasi := false
 	for p.index < len(p.lines) {
 		line := p.lines[p.index]
 		if line.blank {
@@ -269,6 +270,12 @@ func (p *parser) parseFnDecl(header sourceLine) ast.Decl {
 		}
 		if line.indent > bodyIndent {
 			p.error(lineSpan(p.filePath, line), "parser.fn.indent", "fn clauses must align with the first clause")
+			p.index++
+			continue
+		}
+		if sawQuasi {
+			p.error(lineSpan(p.filePath, line), "parser.fn.quasi.order", "quasi clause must be the final clause in an fn body")
+			end = line
 			p.index++
 			continue
 		}
@@ -298,12 +305,16 @@ func (p *parser) parseFnDecl(header sourceLine) ast.Decl {
 		case "quasi":
 			quasi, lastLine := p.parseQuasiClause(line)
 			decl.Quasi = quasi
+			sawQuasi = true
 			end = lastLine
 		default:
 			p.error(lineSpan(p.filePath, line), "parser.fn.clause", "fn body only supports requires, ensures, implements, and quasi clauses")
 			end = line
 			p.index++
 		}
+	}
+	if decl.Quasi == nil {
+		p.error(lineSpan(p.filePath, header), "parser.fn.quasi.required", "fn declaration requires a quasi clause")
 	}
 
 	decl.Span = spanFrom(p.filePath, header, end)

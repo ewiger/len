@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/yy/len/internal/ast"
+	"github.com/yy/len/internal/diag"
 	"github.com/yy/len/internal/parser"
 )
 
@@ -74,4 +75,25 @@ spec ordered
 	if _, ok := spec.Must.(*ast.QuantifiedExpr); !ok {
 		t.Fatalf("must = %T, want quantified expression", spec.Must)
 	}
+}
+
+func TestParseFnRequiresQuasi(t *testing.T) {
+	source := `type Seq
+fn bubble_sort(input: Seq) -> output: Seq
+    ensures output = input
+`
+
+	_, diags := parser.Parse("sample.l1", source)
+	if !hasDiagCode(diags, "parser.fn.quasi.required") {
+		t.Fatalf("expected parser.fn.quasi.required, got %#v", diags)
+	}
+}
+
+func hasDiagCode(diags []diag.Diagnostic, code string) bool {
+	for _, item := range diags {
+		if item.Code == code {
+			return true
+		}
+	}
+	return false
 }

@@ -194,11 +194,10 @@ MustClause     = "must" Formula ;
 
 Signature      = "(" [ ParamList ] ")" [ "->" ResultBinder ] ;
 ResultBinder   = Identifier ":" TypeExpr ;
-FnBody         = INDENT { Trivia | FnClause } DEDENT ;
-FnClause       = RequiresClause
+FnBody         = INDENT { Trivia | ContractClause } QuasiClause DEDENT ;
+ContractClause = RequiresClause
                | EnsuresClause
-               | ImplementsClause
-               | QuasiClause ;
+               | ImplementsClause ;
 RequiresClause = "requires" Formula ;
 EnsuresClause  = "ensures" Formula ;
 ImplementsClause = "implements" Formula ;
@@ -271,7 +270,7 @@ Recommended precedence from tightest to loosest:
 - comments and docstrings are ignored by formal semantics
 - `syntax` declarations do not make the parser dynamically extensible in the MVP
 - semantic validation runs after parse and handles arity, symbol resolution, and binder scope
-- `fn` owns signature-level contract clauses and may include a `quasi:` implementation sketch
+- `fn` owns signature-level contract clauses and requires a `quasi:` implementation sketch
 - `spec` remains a declarative statement form built from `given` and `must`
 - quasi is parsed only as a header plus a raw indented block; style-internal statements are not part of the core host grammar
 - quasi surface validation is delegated to a style profile resolved from the quasi header or the default style configuration
