@@ -3,4 +3,4 @@
 - [ ] Define the syntax and semantics of level 1.
 - [ ] Implement a parser and interpreter for level 1.
 - [ ] Split logic.l1 into l1 and l2, with l1 containing the core structural definitions and l2 containing the interpretation and evaluation rules.
-- [ ] Design a cli for doing validate of syntax and such command as trasnform (l1 -> l2), verify (l1+l2 is consistent) and eventually code generation (l2 -> target language).
+- [ ] Design a cli for doing validate of syntax and such command as transform (l1 -> l2), verify (l1+l2 is consistent) and eventually code generation (l2 -> target language).
