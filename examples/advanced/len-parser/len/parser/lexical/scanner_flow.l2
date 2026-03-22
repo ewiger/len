@@ -1,0 +1,115 @@
+level len.l2
+module len.parser.lexical.scanner_flow
+
+uses l0 "scanner_flow.l0"
+uses l1 "scanner_flow.l1"
+
+generation profile:
+    purpose: emit the Go scanner runtime, state object, and ordered token dispatch
+    determinism: very_high
+    codegen target: go
+    preserve function signatures: yes
+    preserve field order: yes
+    preserve control flow order: yes
+    allow explanatory comments: minimal
+
+generate with target go:
+    file "internal/lexer/lexer.go"
+    package lexer
+
+    imports:
+        "fmt"
+        "strings"
+        "unicode"
+        "unicode/utf8"
+        "github.com/yy/len/internal/diag"
+
+    emit state struct exactly:
+        type state struct {
+            filePath string
+            src      string
+            offset   int
+            line     int
+            column   int
+            bol      bool
+        }
+
+    emit function exactly:
+        func Lex(filePath string, src string) ([]Token, error)
+
+    implement Lex with this algorithm:
+        - initialize state with line = 1, column = 1, bol = true
+        - allocate token slice with capacity len(src)/4
+        - loop forever
+        - call nextToken
+        - on error, return nil and the error
+        - append token to the slice
+        - when token.Kind == KindEOF, return the full token slice
+
+    emit function exactly:
+        func LexExpression(filePath string, src string, start diag.Position) ([]Token, error)
+
+    implement LexExpression with this algorithm:
+        - call Lex(filePath, src)
+        - allocate filtered token slice
+        - skip comment and docstring tokens
+        - offset token spans by start.Line - 1 and start.Column - 1 exactly as in the source implementation
+        - return the filtered token slice
+
+    emit method exactly:
+        func (s *state) nextToken() (Token, error)
+
+    implement nextToken as an ordered dispatch loop:
+        - eof check
+        - block comment prefix check
+        - utf8 rune decode and invalid utf-8 check
+        - newline handling
+        - whitespace handling
+        - beginning-of-line line comment check
+        - triple-docstring prefix check
+        - ordinary string vs docstring split by bol
+        - identifier scan
+        - number scan
+        - fallback to symbol scan
+
+    emit helper methods with these exact signatures:
+        func (s *state) scanIdentifier() (Token, error)
+        func (s *state) scanNumber() (Token, error)
+        func (s *state) scanString(kind Kind) (Token, error)
+        func (s *state) scanTripleDocstring() (Token, error)
+        func (s *state) scanLineComment() (Token, error)
+        func (s *state) scanBlockComment() (Token, error)
+        func (s *state) scanSymbol() (Token, error)
+        func (s *state) advanceString(value string)
+        func (s *state) advanceRune(r rune, size int)
+        func (s *state) position() diag.Position
+
+    emit helper function signatures:
+        func isIdentifierStart(r rune) bool
+        func isIdentifierContinue(r rune) bool
+
+    helper implementation constraints:
+        - scanIdentifier returns KindKeyword when IsKeyword(lexeme) is true, otherwise KindIdentifier
+        - scanNumber accepts only consecutive decimal digits in the current implementation
+        - scanSymbol must try multi-character operators before single-character symbols
+        - advanceRune must update line, column, and bol exactly
+        - newline sets column = 1 and bol = true
+        - non-space runes set bol = false
+
+    exact multi-character operator precedence in scanSymbol:
+        1. <=>
+        2. ->
+        3. :=
+        4. =>
+        5. /\\
+        6. \\/
+        7. <=
+        8. >=
+        9. !=
+        10. ..
+
+    generator notes:
+        - this file should generate imperative Go, not declarative helpers
+        - do not compress the ordered dispatch into tables if that changes behavior
+        - prefer explicit loops and switch statements over metaprogrammed control flow
+        - preserve error message shapes because downstream diagnostics depend on them

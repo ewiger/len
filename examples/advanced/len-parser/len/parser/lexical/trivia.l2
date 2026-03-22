@@ -1,0 +1,78 @@
+level len.l2
+module len.parser.lexical.trivia
+
+uses l0 "trivia.l0"
+uses l1 "trivia.l1"
+
+generation profile:
+    purpose: emit scanner behavior for comments and docstrings in the Go lexer
+    determinism: high
+    codegen target: go
+    preserve branch order: yes
+    preserve beginning-of-line semantics: yes
+
+generate with target go:
+    file "internal/lexer/lexer.go"
+    package lexer
+
+    imports:
+        "fmt"
+        "strings"
+        "unicode"
+        "unicode/utf8"
+        "github.com/yy/len/internal/diag"
+
+    extend function nextToken with ordered rules:
+        rule 1:
+            when offset >= len(src)
+            emit eof token with zero-width span at current position
+
+        rule 2:
+            when source at offset has prefix "<#"
+            dispatch scanBlockComment
+
+        rule 3:
+            decode next rune with utf8.DecodeRuneInString
+            when rune is utf8.RuneError and size == 1
+            return formatted invalid utf-8 error with file, line, and column
+
+        rule 4:
+            when rune is '\n'
+            advance rune and continue loop
+
+        rule 5:
+            when unicode.IsSpace(rune)
+            advance rune and continue loop
+
+        rule 6:
+            when rune is '#' and bol is true
+            dispatch scanLineComment
+
+        rule 7:
+            when source at offset has prefix "\"\"\""
+            dispatch scanTripleDocstring
+
+        rule 8:
+            when rune is '"' and bol is true
+            dispatch scanString with KindDocstring
+
+        rule 9:
+            when rune is '"' and bol is false
+            dispatch scanString with KindString
+
+    emit helper behavior constraints:
+        - scanLineComment consumes until but not including newline
+        - scanBlockComment consumes from <# through #>
+        - scanTripleDocstring consumes from opening triple quote through closing triple quote
+        - standalone beginning-of-line string literals are docstrings, not ordinary strings
+
+    emit LexExpression postprocessing exactly as behavior:
+        - call Lex
+        - drop tokens whose kind is comment or docstring
+        - offset spans relative to the provided start position
+        - return the filtered token slice
+
+    generator notes:
+        - the order of trivia checks is semantically significant
+        - comment and docstring handling must happen before identifier and symbol scanning
+        - keep the beginning-of-line flag as explicit scanner state

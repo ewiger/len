@@ -1,0 +1,22 @@
+type LexerStateModel
+type SourceBufferModel
+type TokenStreamModel
+
+rel HasOffset(state: LexerStateModel)
+rel TracksLineAndColumn(state: LexerStateModel)
+rel BeginsAtLineStart(state: LexerStateModel)
+rel ProducesTokenStream(state: LexerStateModel, stream: TokenStreamModel)
+rel FiltersTrivia(stream: TokenStreamModel)
+rel UsesOrderedDispatch(state: LexerStateModel)
+
+spec scanner_state_shape
+    given state: LexerStateModel
+    must HasOffset(state) and TracksLineAndColumn(state) and BeginsAtLineStart(state)
+
+spec lex_expression_filters_trivia
+    given stream: TokenStreamModel
+    must FiltersTrivia(stream)
+
+spec next_token_dispatch_is_ordered
+    given state: LexerStateModel
+    must UsesOrderedDispatch(state)

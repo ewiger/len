@@ -41,6 +41,24 @@ The namespace is encoded by the filesystem path:
 - `len/parser/quasi/procedural_surface.l0`
 - `len/parser/quasi/procedural_surface.l1`
 
+## Level 2 generation layer
+
+The `l2` layer is the target-aware code-generation layer.
+
+- `.l0` describes intent and constraints in plain language.
+- `.l1` encodes the structural and semantic surface that the current parser and
+	validator understand.
+- `.l2` is allowed to be target-specific and generation-oriented.
+
+For this repository, the first `l2` target is Go. An `l2` file may therefore
+contain directives such as `generate with target go:` followed by structured
+Go-like pseudocode, exact naming constraints, emission rules, imports, file
+paths, and ordered branching requirements.
+
+Unlike `.l1`, `.l2` files are not current CLI parser inputs. They are generation
+specifications intended to make LLM-based code generation much more constrained
+and repeatable.
+
 ## Scope rules for this tree
 
 - `.l0` files describe parser or validator intent in plain language.

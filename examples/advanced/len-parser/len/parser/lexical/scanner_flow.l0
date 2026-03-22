@@ -1,0 +1,15 @@
+Goal: specify the control-flow contract of the current lexer runtime.
+
+This module mirrors the behavior implemented in `internal/lexer/lexer.go`.
+
+It covers:
+- scanner state fields such as file path, source, offset, line, column, and
+  beginning-of-line status
+- the main `Lex` loop that repeatedly calls `nextToken`
+- the `LexExpression` wrapper that filters trivia and offsets spans
+- ordered branching in `nextToken`
+- line and column updates through rune-by-rune advancement
+
+This module is the bridge between the abstract lexical categories in `tokens` and
+`trivia` and the executable scanner logic that later has to be generated for a
+target language.
