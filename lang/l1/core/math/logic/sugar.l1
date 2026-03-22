@@ -8,5 +8,6 @@ syntax A /\ B where A: Formula, B: Formula implies A and B
 syntax A \/ B where A: Formula, B: Formula implies A or B
 syntax !A where A: Formula implies not A
 
-syntax any x: T . P where x: Expr, T: Expr, P: Formula implies forall x: T . P
-syntax some x: T . P where x: Expr, T: Expr, P: Formula implies exists x: T . P
+# TODO: suggest as feature or LIP proposal to support intelligent syntax rewrites
+# syntax any x: T . P where x: Expr, T: Expr, P: Formula implies forall x: T . P
+# syntax some x: T . P where x: Expr, T: Expr, P: Formula implies exists x: T . P
