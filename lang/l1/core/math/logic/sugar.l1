@@ -1,4 +1,4 @@
-# Note that true/false are implemented as constants in logic.l1
+# True/false are implemented as constants in logic.l1
 # syntax true implies forall b: Bool . b = b
 # syntax false implies exists b: Bool . not (b = b)
 

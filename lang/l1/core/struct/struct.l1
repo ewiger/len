@@ -1,3 +1,5 @@
-trait Struct
+import core.types.types
+import core.syntax.syntax
 
-impl Set : Struct
+contract Struct(T: Type)
+    rel Field(self: T, name: Identifier, value: Expr)

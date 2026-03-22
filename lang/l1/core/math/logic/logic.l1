@@ -5,6 +5,8 @@ type Context
 
 const True : Bool
 const False : Bool
+const FormulaTrue : Formula
+const FormulaFalse : Formula
 
 rel Eval(ctx: Context, f: Formula, b: Bool)
 rel Holds(ctx: Context, f: Formula)
@@ -14,13 +16,10 @@ spec holds_def
     given f: Formula
     must Holds(ctx, f) iff Eval(ctx, f, True)
 
-fn eval(ctx: Context, f: Formula) -> b: Bool
-    implements Eval(ctx, f, b)
-    quasi:
-        if f = FormulaTrue:
-            return True
-        if f = FormulaFalse:
-            return False
-        note if f = not a, recursively evaluate a and negate the result
-        note if f = a and b, recursively evaluate both operands and return their conjunction
-        note if f = a or b, recursively evaluate both operands and return their disjunction
+spec formula_true_def
+    given ctx: Context
+    must Eval(ctx, FormulaTrue, True)
+
+spec formula_false_def
+    given ctx: Context
+    must Eval(ctx, FormulaFalse, False)
