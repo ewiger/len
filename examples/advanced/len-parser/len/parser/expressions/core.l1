@@ -1,0 +1,18 @@
+type CoreExpr
+type CoreInt
+
+const DefaultCoreExpr: CoreExpr
+const ZeroCore: CoreInt
+
+rel CoreNameLike(x: CoreExpr)
+rel CoreNumberLike(n: CoreInt)
+rel CoreApplyLike(x: CoreExpr)
+rel CoreGroupLike(x: CoreExpr)
+
+spec identifier_like
+    given x: CoreExpr
+    must CoreNameLike(x)
+
+spec call_and_group_shape
+    given x: CoreExpr
+    must CoreApplyLike(x) or CoreGroupLike(x) or x = DefaultCoreExpr

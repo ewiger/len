@@ -1,0 +1,10 @@
+Goal: specify ignored lexical trivia behavior.
+
+This module describes the current lexer and parser behavior for:
+- beginning-of-line line comments
+- block comments delimited by <# and #>
+- standalone string docstrings
+- triple-quoted multi-line docstrings
+
+These forms are ignored by parsing and validation even though the lexer can
+tokenize comment and docstring material.

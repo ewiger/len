@@ -1,0 +1,15 @@
+import core.order.contracts
+import geometry.point
+
+type Seq
+
+rel Sort(input: Seq, output: Seq)
+rel StableSort(input: Seq, output: Seq) refines Sort(input, output)
+
+spec point_sort_assumes_order
+    must Ordered(Point)
+
+fn stable_sort(input: Seq) -> output: Seq
+    implements StableSort(input, output)
+    quasi:
+        return input

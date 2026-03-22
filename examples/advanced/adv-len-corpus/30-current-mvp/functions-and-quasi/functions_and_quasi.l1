@@ -1,0 +1,33 @@
+type Seq
+type Elem
+
+rel Sorted(s: Seq)
+rel Permutation(a: Seq, b: Seq)
+rel MergeSort(input: Seq, output: Seq)
+rel CopyInto(input: Seq, output: Seq)
+
+fn merge_sort(input: Seq) -> output: Seq
+    requires input = input
+    implements MergeSort(input, output)
+    ensures Sorted(output)
+    ensures Permutation(input, output)
+    quasi using style ProceduralAlgorithm:
+        let xs := input
+        let done := false
+
+        while !done:
+            set done := true
+            if true:
+                let left := xs
+            else:
+                set xs := input
+
+        return xs
+
+fn copy_all(input: Seq) -> output: Seq
+    implements CopyInto(input, output)
+    quasi using style ProceduralAlgorithm:
+        let acc := input
+        for item in input:
+            append item to acc
+        return acc

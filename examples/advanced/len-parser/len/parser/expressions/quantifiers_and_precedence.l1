@@ -1,0 +1,13 @@
+type QuantInt
+type QuantFormula
+
+rel QuantLess(i: QuantInt, j: QuantInt)
+rel QuantHolds(f: QuantFormula)
+
+spec quantified_body
+    given f: QuantFormula
+    must forall i: QuantInt, j: QuantInt . QuantLess(i, j) implies QuantHolds(f)
+
+spec symbolic_connectives
+    given A, B: QuantFormula
+    must !QuantHolds(A) \/ QuantHolds(B) <=> (QuantHolds(A) => QuantHolds(B))

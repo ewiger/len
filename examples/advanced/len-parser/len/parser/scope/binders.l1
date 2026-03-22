@@ -1,0 +1,15 @@
+type ScopeSeq
+type ScopeInt
+
+rel ScopeAt(s: ScopeSeq, i: ScopeInt)
+rel ScopeValid(s: ScopeSeq)
+
+spec given_scope
+    given s: ScopeSeq, i: ScopeInt
+    must ScopeAt(s, i) implies ScopeValid(s)
+
+fn scope_project(input: ScopeSeq) -> output: ScopeSeq
+    ensures output = input
+    quasi using style ProceduralAlgorithm:
+        let xs := input
+        return xs

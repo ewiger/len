@@ -1,0 +1,8 @@
+Goal: specify the current quasi host boundary and procedural style validation.
+
+This module records that:
+- the parser owns only the quasi header and raw indented body capture
+- the validator resolves a style profile, defaulting to ProceduralAlgorithm
+- quasi surface validation is structural and line-oriented
+- keyword filtering, regex rules, indentation, block children, and continuation
+  alignment are enforced after parsing

@@ -1,0 +1,10 @@
+Goal: specify the next layer of relation and structure sugar that the parser
+will eventually need to recognize directly.
+
+This module should exercise:
+- relation-level refines clauses
+- struct-level satisfies clauses
+- struct-level derives clauses
+- the distinction between relation refinement and fn implements linkage
+
+This file is a design target rather than a current acceptance test.

@@ -1,0 +1,9 @@
+Goal: specify binder introduction and scope rules from parser plus validator.
+
+This module covers:
+- rel and fn parameter binders
+- fn result binder visibility in ensures and implements clauses
+- spec given binders
+- syntax where binders
+- quantified binders inside expressions
+- duplicate binder rejection inside one scope layer

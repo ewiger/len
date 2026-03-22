@@ -1,0 +1,9 @@
+Goal: specify the record-like struct surface discussed in the docs.
+
+This module should establish that:
+- struct is an explicit top-level declaration
+- the struct body is an indented sequence of field declarations
+- field syntax remains lightweight as name: Type
+- extra laws about the struct remain ordinary top-level specs
+
+This file is a design target rather than a current acceptance test.

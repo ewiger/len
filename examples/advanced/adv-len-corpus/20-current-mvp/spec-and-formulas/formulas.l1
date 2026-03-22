@@ -1,0 +1,28 @@
+type Set
+type Nat
+type Formula
+
+rel Member(x: Set, s: Set)
+rel Subset(x: Set, y: Set)
+rel Less(i: Nat, j: Nat)
+rel Holds(f: Formula)
+
+syntax x in s where x: Set, s: Set implies Member(x, s)
+syntax x subsetof y where x: Set, y: Set implies Subset(x, y)
+
+spec subset_bridge
+    given x, y: Set
+    must x subsetof y implies
+        forall z: Set . z in x implies z in y
+
+spec order_trichotomy_shape
+    given i, j: Nat
+    must i < j or i = j or j < i
+
+spec connective_surface
+    given A, B: Formula
+    must !(Holds(A) /\ Holds(B)) <=> (!Holds(A) \/ !Holds(B))
+
+spec grouped_implication
+    given A, B: Formula
+    must (Holds(A) and Holds(B)) => Holds(A)

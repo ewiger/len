@@ -1,0 +1,12 @@
+Goal: describe the surface AST that the current parser builds.
+
+This module mirrors the implemented AST categories:
+- file and declaration nodes
+- binder nodes
+- fn clause nodes
+- quasi raw block nodes
+- expression nodes for identifiers, qualified names, literals, application,
+  unary, binary, quantified, and grouped forms
+
+This module is descriptive. It documents the AST surface that later phases
+consume.

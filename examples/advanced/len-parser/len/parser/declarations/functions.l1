@@ -1,0 +1,12 @@
+type FnSeq
+
+rel FnSorted(s: FnSeq)
+rel FnCopies(input: FnSeq, output: FnSeq)
+
+fn copy_seq(input: FnSeq) -> output: FnSeq
+    requires input = input
+    implements FnCopies(input, output)
+    ensures FnSorted(output) or output = input
+    quasi using style ProceduralAlgorithm:
+        let xs := input
+        return xs

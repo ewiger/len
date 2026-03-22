@@ -1,0 +1,7 @@
+Goal: specify quantified formulas and precedence-sensitive operators.
+
+This module reflects the implemented expression parser behavior for:
+- forall and exists binders
+- unary not, !, and -
+- binary precedence across iff, implies, or, and, equality, order, and arithmetic
+- symbolic alternatives such as =>, <=>, /\\, and \\/

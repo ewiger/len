@@ -1,0 +1,12 @@
+Goal: concentrate the current inline expression and formula surface into one
+module.
+
+This module should exercise:
+- given and must clauses
+- quantifiers with typed binders
+- infix logical operators
+- symbolic operators such as =>, <=>, /\, and \/
+- syntax aliases for infix domain relations such as in and subsetof
+- grouping and precedence across nested formulas
+
+The examples should remain inside the parser surface that exists today.
