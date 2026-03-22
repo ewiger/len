@@ -33,13 +33,15 @@ Current implementation:
 Build the CLI:
 
 ```bash
-go build ./cmd/len-cli
+make build
 ```
+
+This writes the CLI binary to `bin/len`.
 
 Run all unit tests:
 
 ```bash
-go test ./...
+make test
 ```
 
 Run the validator on the hello world example:
