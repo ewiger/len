@@ -1,0 +1,148 @@
+version: 1
+style:
+  name: ProceduralAlgorithm
+  description: >-
+    Surface-validation profile for algorithmic quasi blocks such as the sorting
+    examples. This style is line-oriented, indentation-sensitive, and forbids
+    free-form narrative lines.
+  derivedFrom:
+    - examples/quasi/sorting/bubble_sort.l1
+    - examples/quasi/sorting/insertion_sort.l1
+    - examples/quasi/sorting/merge_sorting.l1
+    - examples/quasi/sorting/quick_sort.l1
+
+layout:
+  indentation:
+    mode: spaces
+    width: 4
+  allowBlankLines: true
+  allowNarrativeLines: false
+
+keywords:
+  blockOpeners:
+    - if
+    - while
+    - for
+  blockContinuations:
+    - else
+    - else if
+  simpleStatements:
+    - let
+    - set
+    - append
+    - return
+
+slots:
+  identifier:
+    pattern: '[A-Za-z_][A-Za-z0-9_]*'
+  expr:
+    pattern: '.+'
+  formula:
+    pattern: '.+'
+  target:
+    pattern: '.+'
+  collection:
+    pattern: '.+'
+
+rules:
+  - id: let-assign
+    kind: statement
+    keyword: let
+    pattern: '^let\s+(?P<name>[A-Za-z_][A-Za-z0-9_]*)\s*:=\s*(?P<expr>.+)$'
+    captures:
+      name: identifier
+      expr: expr
+
+  - id: let-typed-assign
+    kind: statement
+    keyword: let
+    pattern: '^let\s+(?P<name>[A-Za-z_][A-Za-z0-9_]*)\s*:\s*(?P<type>.+)\s*:=\s*(?P<expr>.+)$'
+    captures:
+      name: identifier
+      type: expr
+      expr: expr
+
+  - id: set-assign
+    kind: statement
+    keyword: set
+    pattern: '^set\s+(?P<target>.+)\s*:=\s*(?P<expr>.+)$'
+    captures:
+      target: target
+      expr: expr
+
+  - id: append-to
+    kind: statement
+    keyword: append
+    pattern: '^append\s+(?P<expr>.+)\s+to\s+(?P<target>.+)$'
+    captures:
+      expr: expr
+      target: target
+
+  - id: return-expr
+    kind: statement
+    keyword: return
+    pattern: '^return\s+(?P<expr>.+)$'
+    captures:
+      expr: expr
+
+  - id: if-block
+    kind: block
+    keyword: if
+    pattern: '^if\s+(?P<formula>.+):$'
+    captures:
+      formula: formula
+    opensBlock: true
+    childPolicy: any
+    continuations:
+      - else
+      - else if
+
+  - id: else-if-block
+    kind: continuation
+    keyword: else if
+    pattern: '^else\s+if\s+(?P<formula>.+):$'
+    captures:
+      formula: formula
+    opensBlock: true
+    attachesTo:
+      - if-block
+      - else-if-block
+    mustAlignWithParent: true
+
+  - id: else-block
+    kind: continuation
+    keyword: else
+    pattern: '^else:$'
+    opensBlock: true
+    attachesTo:
+      - if-block
+      - else-if-block
+    mustAlignWithParent: true
+
+  - id: while-block
+    kind: block
+    keyword: while
+    pattern: '^while\s+(?P<formula>.+):$'
+    captures:
+      formula: formula
+    opensBlock: true
+    childPolicy: any
+
+  - id: for-range-block
+    kind: block
+    keyword: for
+    pattern: '^for\s+(?P<name>[A-Za-z_][A-Za-z0-9_]*)\s+in\s+(?P<expr>.+):$'
+    captures:
+      name: identifier
+      expr: expr
+    opensBlock: true
+    childPolicy: any
+
+validation:
+  firstTokenMustBeKeyword: true
+  unknownKeywordPolicy: reject
+  nonMatchingLinePolicy: reject
+  requireContinuationImmediatelyAfterParentBlock: true
+  requireConsistentIndentation: true
+  requireIndentAfterBlockOpener: true
+  requireReturnExpression: true

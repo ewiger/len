@@ -61,6 +61,7 @@ Without a parser and validator, the language design cannot be exercised with con
 - validation style: separate semantic validation pass after parse
 - first CLI milestone: `len-cli validate`
 - grammar documentation: keep a human-readable grammar document alongside the implementation
+- quasi strategy: parse quasi headers in `fn`, capture quasi bodies as raw indented lines, and perform style-specific surface validation after parse
 
 ## Proposal Documents
 
@@ -69,6 +70,8 @@ This proposal is split into focused documents:
 - `README.md`: proposal overview and accepted decisions
 - `plan.md`: exact implementation steps and target files
 - `grammar.md`: lexical rules, comments/docstrings, and MVP grammar for `len.l1`
+- `quasi-styles.md`: style-profile model and surface-validation strategy for quasi blocks
+- `procedural-algorithm.quasi-style.yaml`: first concrete style profile derived from the sorting examples
 
 ## Current Language Surface
 
@@ -98,6 +101,8 @@ The preferred `fn` direction is function-like:
 - optional result binder after `->`
 - contract clauses such as `requires`, `ensures`, and `implements`
 - optional embedded `quasi:` block for an algorithm sketch or proof-oriented implementation outline
+- optional explicit style marker such as `quasi using style ProceduralAlgorithm:`
+- quasi bodies are captured as raw indented text and validated later against a style profile rather than fully parsed by the host grammar
 
 ### Spec Surface
 
@@ -165,6 +170,14 @@ block comment
 ## Design Rationale
 
 The accepted approach remains a hand-written lexer and parser plus a separate validation phase. That is the best fit for the current corpus because the syntax is still changing and includes context-sensitive constructs such as `spec`, `syntax`, and `quasi`.
+
+For quasi specifically, the accepted direction is intentionally shallow at parse time:
+
+- the host parser recognizes the quasi clause header and its indentation-delimited body
+- the body is stored as raw lines with source spans and indentation metadata
+- a later validation pass resolves the style and applies a surface-validation profile such as [procedural-algorithm.quasi-style.yaml](/Users/yy/code/len/len-feat-cli-l1-validation/doc/proposals/accepted/lip-0001-cli-parser-n-validation/procedural-algorithm.quasi-style.yaml)
+
+This keeps the core grammar stable while still allowing repository-local or custom quasi styles.
 
 ## Acceptance Criteria
 

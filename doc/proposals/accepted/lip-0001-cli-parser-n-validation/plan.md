@@ -33,6 +33,9 @@ internal/
     parser.go
     declarations.go
     expressions.go
+  quasi/
+    profile.go
+    surface.go
   validator/
     symbols.go
     validator.go
@@ -125,8 +128,8 @@ Define a canonical AST for the current parser scope.
 ### Steps
 
 1. add top-level declaration nodes for `import`, `type`, `rel`, `fn`, `const`, `spec`, `syntax`, `trait`, `impl`, `keyword`, and `symbol`
-2. extend `fn` nodes with signature information, result binders, contract clauses such as `requires`, `ensures`, and `implements`, and an optional embedded `QUASI_BLOCK` plus optional style metadata for quasi blocks
-3. add quasi statement nodes for line-oriented forms such as `let`, `set`, `choose`, `show`, `return`, `if`, `while`, and `repeat`
+2. extend `fn` nodes with signature information, result binders, contract clauses such as `requires`, `ensures`, and `implements`, and an optional embedded raw `QUASI_BLOCK` plus optional style metadata for quasi blocks
+3. represent a quasi block as raw lines, indentation metadata, and source spans rather than as a fully parsed statement AST
 4. add expression nodes for identifiers, qualified names, applications, equality, infix expressions, unary expressions, quantifiers, and grouped expressions
 5. add explicit nodes for comments and docstrings only if the parser needs to preserve them for tooling
 6. attach spans to major nodes
@@ -152,12 +155,37 @@ Parse declarations and formulas from the current corpus.
 
 1. parse top-level declarations in source order
 2. parse `spec` with zero or more `given` clauses followed by one `must` clause
-3. parse `fn` with a signature, optional result binder, contract clauses such as `requires`, `ensures`, and `implements`, and an optional embedded `quasi:` block
+3. parse `fn` with a signature, optional result binder, contract clauses such as `requires`, `ensures`, and `implements`, and an optional embedded `quasi` clause with optional `using style <Name>` header metadata
 4. parse `syntax` declarations as surface form, binder list, and canonical form
-5. parse embedded `quasi:` bodies as indentation-sensitive `QUASI_BLOCK` regions using a dedicated block routine in the main parser
+5. capture embedded quasi bodies as indentation-sensitive raw `QUASI_BLOCK` regions using a dedicated block routine in the main parser, without parsing style-internal statements
 6. implement precedence-based expression parsing
 7. treat comments and docstrings as non-semantic trivia and ignore them during formal parse
 8. add parser tests for every declaration form present in the current corpus
+
+## Phase 5.5: Quasi Style Profiles
+
+### Goal
+
+Load quasi style profiles and prepare them for surface validation.
+
+### Files
+
+- `internal/quasi/profile.go`
+- `internal/quasi/surface.go`
+- `internal/quasi/profile_test.go`
+
+### Inputs
+
+- [doc/proposals/accepted/lip-0001-cli-parser-n-validation/quasi-styles.md](/Users/yy/code/len/len-feat-cli-l1-validation/doc/proposals/accepted/lip-0001-cli-parser-n-validation/quasi-styles.md)
+- [doc/proposals/accepted/lip-0001-cli-parser-n-validation/procedural-algorithm.quasi-style.yaml](/Users/yy/code/len/len-feat-cli-l1-validation/doc/proposals/accepted/lip-0001-cli-parser-n-validation/procedural-algorithm.quasi-style.yaml)
+
+### Steps
+
+1. define Go structs for style profiles, slot definitions, rule definitions, and validation settings
+2. load YAML style profiles with `gopkg.in/yaml.v3`
+3. compile regular expressions once during profile load
+4. expose a surface-validation API that accepts raw quasi lines plus a style profile
+5. add tests for profile loading, regex compilation, and block-structure validation
 
 ## Phase 6: Loader
 
@@ -195,9 +223,10 @@ Validate semantic well-formedness after parse.
 2. detect duplicate top-level names per namespace
 3. validate relation arity and parameter references
 4. validate binder scope in formulas
-5. validate unresolved references in `syntax` and in host expressions embedded inside `quasi`
+5. validate unresolved references in `syntax` and, where enabled, in host expressions or formulas captured from quasi style rules
 6. validate `spec` structure and required `must` clause
-7. validate `fn` structure, including contract clauses, result binders, `return` alignment inside quasi blocks, and style-profile conformance when a quasi style is declared
+7. validate `fn` structure, including contract clauses, result binders, quasi header correctness, and style-profile conformance when a quasi block is present
+8. surface-validate raw quasi blocks by resolving the declared style, applying its profile, and reporting lexical or structural diagnostics with source spans
 
 ## Phase 8: CLI Wiring
 
@@ -234,8 +263,8 @@ Cover the parser and validator with unit tests and corpus-backed tests.
 ### Steps
 
 1. add table-driven lexer tests
-2. add parser tests for precedence and block constructs
-3. add validator tests for duplicates, unresolved names, and arity mismatches
+2. add parser tests for precedence, declaration structure, quasi headers, and raw quasi block capture
+3. add validator tests for duplicates, unresolved names, arity mismatches, and quasi style-profile failures
 4. add corpus tests that parse `lang/l1/**`
 5. add negative fixtures that assert expected diagnostic codes
 

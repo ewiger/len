@@ -98,8 +98,8 @@ Notes:
 
 - `fn` is a top-level grammar form for function-like declarations
 - `quasi` is a dedicated embedded block for pseudo-algorithmic syntax inside `fn` declarations
-- `quasi` is not a separate level of the language and does not require a separate top-level parser; the main parser should parse it via a dedicated block routine
-- words used only inside quasi statements such as `let`, `choose`, `return`, `if`, `else`, `while`, and `repeat` should remain quasi-local rather than become global `len.l1` keywords
+- `quasi` is not a separate level of the language and does not require a separate top-level parser; the main parser should only capture its header and raw indented body
+- words used only inside quasi styles such as `let`, `set`, `append`, `return`, `if`, `else`, `while`, and `for` should remain quasi-local rather than become global `len.l1` keywords
 
 ## Symbolic Tokens
 
@@ -155,9 +155,9 @@ The supported MVP top-level forms are:
 
 Preferred direction after the current MVP:
 
-- keep quasi as an embedded `quasi:` block owned only by `fn`
-- let the host parser capture a `QUASI_BLOCK`
-- parse the block contents with a dedicated quasi parsing routine inside the main parser
+- keep quasi as an embedded clause owned only by `fn`
+- let the host parser capture a style-tagged raw `QUASI_BLOCK`
+- validate block contents later by applying a style profile such as [procedural-algorithm.quasi-style.yaml](/Users/yy/code/len/len-feat-cli-l1-validation/doc/proposals/accepted/lip-0001-cli-parser-n-validation/procedural-algorithm.quasi-style.yaml)
 
 ## EBNF
 
@@ -202,35 +202,12 @@ FnClause       = RequiresClause
 RequiresClause = "requires" Formula ;
 EnsuresClause  = "ensures" Formula ;
 ImplementsClause = "implements" Formula ;
-QuasiClause    = "quasi" ":" QuasiBlock ;
-QuasiBlock     = INDENT { QuasiLine } DEDENT ;
+QuasiClause    = QuasiHeader RawQuasiBlock ;
+QuasiHeader    = "quasi" [ "using" "style" Identifier ] ":" ;
+RawQuasiBlock  = INDENT { RawQuasiLine } DEDENT ;
+RawQuasiLine   = TextLine ;
 
 SyntaxDecl     = "syntax" Expr "where" BinderList "implies" Expr ;
-
-QuasiLine      = QuasiStmt | QuasiNarrative ;
-QuasiStmt      = LetStmt
-               | SetStmt
-               | ChooseStmt
-               | AssumeStmt
-               | HaveStmt
-               | ShowStmt
-               | ReturnStmt
-               | ForEachStmt
-               | IfStmt
-               | WhileStmt
-               | RepeatStmt ;
-LetStmt        = "let" Identifier [ ":" TypeExpr ] ":=" Expr ;
-SetStmt        = "set" Identifier ":=" Expr ;
-ChooseStmt     = "choose" Identifier [ ":" TypeExpr ] "such" "that" Formula ;
-AssumeStmt     = "assume" Formula ;
-HaveStmt       = "have" Formula ;
-ShowStmt       = "show" Formula ;
-ReturnStmt     = "return" Expr ;
-ForEachStmt    = "for" "each" Identifier "in" Expr ":" QuasiBlock ;
-IfStmt         = "if" Formula ":" QuasiBlock [ "else" ":" QuasiBlock ] ;
-WhileStmt      = "while" Formula ":" QuasiBlock ;
-RepeatStmt     = "repeat" ":" QuasiBlock "until" Formula ;
-QuasiNarrative = TextLine ;
 
 BinderList     = Binder { "," Binder } ;
 Binder         = Identifier ":" TypeExpr ;
@@ -296,19 +273,21 @@ Recommended precedence from tightest to loosest:
 - semantic validation runs after parse and handles arity, symbol resolution, and binder scope
 - `fn` owns signature-level contract clauses and may include a `quasi:` implementation sketch
 - `spec` remains a declarative statement form built from `given` and `must`
-- quasi is parsed as an embedded block language by the main parser rather than as a top-level declaration form
+- quasi is parsed only as a header plus a raw indented block; style-internal statements are not part of the core host grammar
+- quasi surface validation is delegated to a style profile resolved from the quasi header or the default style configuration
 - `implements` is the preferred clause for linking an `fn` to an abstract relation, while `ensures` remains appropriate for postconditions
 
-Preferred future extension for configurable quasi styles:
+Current accepted direction for configurable quasi styles:
 
-- allow `quasi using CustomStyle:` as the clause header
+- support `quasi using style CustomStyle:` as the clause header
 - interpret `CustomStyle` as a style profile that fixes the accepted step keywords and line schemas for that block
 - allow style profiles to come from built-in presets, repository-local declarations, or plugins
-- Also `quasi:` means default style, which is currently `ProcStyle` but may be redefined in the future
+- treat `quasi:` as a default-style header whose profile is configured by the implementation
 
 ## Known MVP Limits
 
 - grammar is intentionally fixed to the current corpus under `lang/l1/**`
 - import path resolution is defined by the implementation plan, not by this grammar alone
 - comments and docstrings may be retained in the AST for tooling, but they must not influence validation
-- quasi is intentionally only partially formalized; unknown lines inside a quasi block may be preserved as narrative rather than rejected outright
+- the host grammar does not parse style-internal quasi statements into a statement AST
+- whether an unknown quasi line is rejected or tolerated depends on the resolved style profile, not on the host grammar alone
