@@ -1,11 +1,11 @@
-# LIP-0002: Struct, Trait, and Relation Refinement Sugar for len.l1
+# LIP-0002: Struct, Contract, and Relation Refinement Sugar for len.l1
 
 ## Metadata
 
 | Field | Value |
 | --- | --- |
 | LIP | 0002 |
-| Title | Struct, Trait, and Relation Refinement Sugar for len.l1 |
+| Title | Struct, Contract, and Relation Refinement Sugar for len.l1 |
 | Status | Draft |
 | Author | TBD |
 | Created | 2026-03-22 |
@@ -15,17 +15,18 @@
 
 ## Summary
 
-This proposal clarifies how `struct`, `trait`, and relation-level refinement should appear in `len.l1` without changing the core language model.
+This proposal clarifies how `struct`, `contract`, contract satisfaction, and relation-level refinement should appear in `len.l1` without changing the core language model.
 
 The proposal keeps `type` and `rel` as the true L1 primitives. `spec` remains the general mechanism for arbitrary laws, definitions, and semantic constraints. `fn` remains the executable or constructive form, optionally paired with an embedded `quasi` block for open-ended pseudocode.
 
-Within that model, this proposal makes five design moves:
+Within that model, this proposal makes six design moves:
 
 - add relation-level `refines` syntax sugar
 - remove `impl` from L1
-- keep `trait`, but define it as grouped contract sugar rather than an implementation mechanism
+- replace `trait` with `contract`, defined as grouped contract sugar
 - keep `struct`, but define it as record sugar rather than a class-like construct
-- add `derives` as a companion to `refines` for generating derived specs
+- add `satisfies` for explicit contract adoption
+- keep `derives` as the structural companion to `satisfies`
 
 The intent is to make the surface language more readable while keeping the semantics minimal, relational, and high-level.
 
@@ -34,9 +35,9 @@ The intent is to make the surface language more readable while keeping the seman
 This proposal is split into focused documents:
 
 - `README.md`: proposal overview, relation refinement, and migration away from `impl`
-- `trait.md`: detailed design for `trait` as grouped contract sugar
+- `contract.md`: detailed design for `contract` as grouped contract sugar
 - `struct.md`: detailed design for `struct` as composite type sugar
-- `derives.md`: detailed design for `derives` as companion to `refines` for generating derived specs
+- `derive.md`: detailed design for `satisfies` and `derives` as the bridge from structure to contracts
 
 ## Motivation
 
@@ -67,7 +68,7 @@ First, the relation between an abstract contract and a more specific relation is
 
 Second, `impl` is both ambiguous and redundant. In a language that already has `spec`, `rel`, and `fn`, `impl` does not introduce a new essential idea. It mainly imports expectations from other languages.
 
-Third, `trait` and `struct` are useful words for readers, but they are currently underspecified. Without a clear lowering model they risk becoming accidental new primitives instead of shallow sugar over the existing core.
+Third, `trait` is still carrying unnecessary foreign-language baggage even though its intended meaning is already grouped contract sugar. `struct` also needs a clearer bridge to those grouped contracts. Without a clear lowering model both forms risk becoming accidental new primitives instead of shallow sugar over the existing core.
 
 The result is vocabulary drift: the surface starts to look object-oriented even though the actual design is relational and specification-first.
 
@@ -108,20 +109,24 @@ The keyword is confusing for three reasons:
 After this proposal, the language should express the important relationships directly:
 
 - use `refines` for relation refinement
-- use `trait` as group contract sugar or combination of many `fn` and `rel` declarations
-- use `fn` clauses in trait but remember that more details can always be expressed in `spec`
+- use `contract` as grouped contract sugar over `rel`, `fn`, and `spec`
+- use `satisfies` when a type or structure adopts a contract
+- use `fn` clauses inside contracts when appropriate, while keeping `spec` available for additional laws
 
-If a previous `impl` declaration was intended to mean that a type satisfies a named contract, that meaning should be re-expressed through the desugared contract relations and specs rather than through a dedicated implementation keyword.
+If a previous `impl` declaration was intended to mean that a type satisfies a named contract, that meaning should be re-expressed through `satisfies`, `derives`, and the desugared contract relations and specs rather than through a dedicated implementation keyword.
 
-### 3. Keep `trait`, but Redefine It Clearly
+### 3. Replace `trait` with `contract`
 
-`trait` should remain in the surface language, but only as grouped contract sugar.
+`contract` should replace `trait` in the surface language as the explicit grouped-contract form.
 
-The detailed trait design is specified in `trait.md`. In short:
+The detailed contract design is specified in `contract.md`. In short:
 
-- a `trait` groups related `rel`, `fn`, and `spec` declarations
-- it may look interface-like in surface form
-- it must not introduce inheritance, dispatch, or Rust-style implementation machinery
+- a `contract` groups related `rel`, `fn`, and `spec` declarations
+- it may still look interface-like in surface form
+- it introduces a same-named satisfaction relation `Eq(T)` 
+that satisfy the contract 
+- it also introduces a generic relation predicate or `Eq(T,x)` (where `x` is a value of type `T`) that can be used in Formula and `spec` declarations
+- it must not introduce inheritance, dispatch, instance lookup, or Rust-style implementation machinery
 - its semantics remain grounded in ordinary `rel`, `fn`, and `spec`
 
 ### 4. Keep `struct`, but Define It as a Composite Type
@@ -135,9 +140,39 @@ The detailed struct design is specified in `struct.md`. In short:
 - field syntax stays lightweight as direct `name: Type` entries
 - the semantics remain reducible to `type` plus lower-level relational structure
 
-### 5. Add `derives` as Companion to `refines`
+### 5. Add `satisfies` for Contract Adoption
 
-`derive` should be added as a companion to `refines` for generating derived specs from struct fields and trait members.
+A type or structure should be able to declare that it adopts a contract explicitly.
+
+Example:
+
+```len
+contract Eq(T: Type)
+    rel Equal(x: T, y: T)
+
+struct Point satisfies Eq(Point)
+    x: Real
+    y: Real
+```
+
+This should be read as contract adoption, not instance registration. It says that `Point` is intended to satisfy the contract proposition `Eq(Point)`, and that elaboration or validation must account for the corresponding relations and laws.
+
+### 6. Keep `derives` as the Structural Companion to `satisfies`
+
+`derives` should remain the mechanism for generated satisfaction artifacts when the contract view follows canonically from structure.
+
+Example:
+
+```len
+contract Eq(T: Type)
+    rel Equal(x: T, y: T)
+
+struct Point derives Eq(Point)
+    x: Real
+    y: Real
+```
+
+Here `derives` means that the contract adoption is structural and that elaboration may generate the corresponding relations and defining specs from the fields of `Point`.
 
 ## Grammar Sketch
 
@@ -150,22 +185,28 @@ TopLevelDecl   = ImportDecl
                | FnDecl
                | SpecDecl
                | StructDecl
-               | TraitDecl
+               | ContractDecl
                | KeywordDecl
                | SymbolDecl ;
 
 RelDecl        = "rel" Identifier "(" [ ParamList ] ")" [ RefinesClause ] ;
 RefinesClause  = "refines" Formula ;
+ContractDecl   = "contract" Identifier [ "(" [ ParamList ] ")" ] ContractBody ;
+StructDecl     = "struct" Identifier [ SatisfiesClause ] [ DerivesClause ] StructBody ;
+SatisfiesClause = "satisfies" Formula ;
+DerivesClause  = "derives" FormulaList ;
 ```
 
 Notable consequences:
 
 - `impl` is removed
 - `implements` is not used for relation refinement, only in `fn` clauses when appropriate
-- `trait` and `struct` remain explicit top-level surface forms
-- detailed trait and struct grammar is specified in the companion documents
+- `contract` and `struct` remain explicit top-level surface forms
+- `satisfies` names contract adoption directly
+- `derives` names structural generation directly
+- detailed contract and struct grammar is specified in the companion documents
 
-This proposal does require `trait` and `struct` to be represented explicitly in the parser and validator as top keywords.
+This proposal does require `contract` and `struct` to be represented explicitly in the parser and validator as top keywords.
 
 ## Desugaring / Lowering Model
 
@@ -189,11 +230,38 @@ spec bubble_sort_refines_sort
 
 The generated `spec` name is illustrative. Implementations may synthesize names deterministically.
 
-### Trait as Grouped Contract
+### Contract as Grouped Contract
 
-The detailed trait surface and lowering model are specified in `trait.md`.
+The detailed contract surface and lowering model are specified in `contract.md`.
 
-At the overview level, the important point is that `trait` remains an explicit surface declaration while its meaning is still reducible to ordinary `rel`, `fn`, and `spec` declarations.
+At the overview level, the important point is that `contract` remains an explicit surface declaration while its meaning is still reducible to ordinary `rel`, `fn`, and `spec` declarations.
+
+### Contract Adoption and Structural Derivation
+
+Surface:
+
+```len
+contract Eq(T: Type)
+    rel Equal(x: T, y: T)
+
+struct Point satisfies Eq(Point)
+    x: Real
+    y: Real
+```
+
+Lowering sketch:
+
+```len
+type Point
+
+rel Point_x(p: Point, value: Real)
+rel Point_y(p: Point, value: Real)
+
+rel Eq(Point)
+rel Equal_Point(x: Point, y: Point)
+```
+
+If the declaration instead uses `derives Eq(Point)`, elaboration may synthesize the canonical defining specs for `Equal_Point` from the struct fields.
 
 ### Struct as Composite Type Sugar
 
@@ -247,6 +315,24 @@ Here the roles stay separate:
 - `implements` states that `normalize_slashes` is the executable form linked to `SlashNormalizedPath`
 - the example does not add an `ensures CanonicalPath(...)` clause because that would be redundant once the implemented relation already refines `CanonicalPath`
 
+### Example: Generic Contract Satisfaction
+
+```len
+contract Ord(T: Type)
+    rel LessEq(x: T, y: T)
+    spec ord_reflexive
+        given x: T
+        must LessEq(x, x)
+    spec ord_transitive
+        given x, y, z: T
+        must LessEq(x, y) and LessEq(y, z) implies LessEq(x, z)
+
+struct NatBox satisfies Ord(NatBox)
+    value: Nat
+```
+
+This keeps the carrier type explicit. `Ord(NatBox)` is a contract proposition, not a hidden trait-instance table.
+
 ## Rationale
 
 This proposal preserves the existing `len` philosophy.
@@ -256,9 +342,11 @@ This proposal preserves the existing `len` philosophy.
 Within that architecture:
 
 - `refines` gives the right name for semantic implication between relations
-- `derives` provides a companion mechanism for generating derived specs from struct fields and trait members
+- `contract` gives the right name for grouped contract declarations and their satisfaction relation
+- `satisfies` gives the right name for explicit contract adoption
+- `derives` provides a companion mechanism for generating derived specs from struct fields and contract members
 - removing `impl` reduces misleading programming-language baggage
-- `trait` remains available as a readable grouping device without becoming a new semantic tower
+- replacing `trait` with `contract` removes unnecessary OO and Rust-adjacent vocabulary
 - `struct` remains available as readable data-shape sugar without becoming an OO class
 
 This keeps the language minimal while still making common patterns concise.
@@ -269,22 +357,24 @@ This proposal changes the preferred surface language and therefore requires migr
 
 - `impl` declarations should be rejected or deprecated in L1 once replacement lowering is implemented
 - relation-level semantics previously described informally through `implements` should move to `refines` or explicit `spec`
+- existing `trait` declarations should migrate to `contract`
+- existing type-to-contract intent should migrate to `satisfies` or `derives`, depending on whether the contract view is declared or generated
 - `fn ... implements ...` clauses remain as is
-- existing parsers and validators that recognize `impl` and `implements` do not need a transition strategy - it's MVP
+- existing parsers and validators that recognize `trait` and `impl` will need a transition strategy once the surface syntax is updated
 
 Because current usage is still limited, this is a good point to simplify the vocabulary before those forms become entrenched.
 
 ## Open Questions
 
-1. Should `fn` keep `implements` as the dedicated relation-linking clause, or should `ensures Relation(...)` also be allowed as equivalent surface sugar? Both are 
-kept, as they do different things: `implements` links the function to a relation as its contract, while `ensures` states a postcondition that may or may not be the same as the contract relation. there is also `requires`, which states a precondition. The contract relation is the primary semantic link, while ensures and requires can express additional constraints. Finally. `fn` also declare a new relation with the same signature as the function, which can be used for further specifications.
+1. Should `fn` keep `implements` as the dedicated relation-linking clause, or should `ensures Relation(...)` also be allowed as equivalent surface sugar? The current direction keeps both, since they do different things: `implements` links the function to a relation as its contract, while `ensures` states a postcondition that may or may not be the same as the contract relation.
 2. Should `refines` accept only relation applications, or any formula whose free variables match the relation signature?
-3. What transition strategy should parsers and validators use while `impl` and older `implements` usage still exists in the repository?
+3. Should `satisfies` accept only contract applications, or any formula recognized as a contract proposition?
+4. What transition strategy should parsers and validators use while `trait`, `impl`, and older usage still exists in the repository?
 
 ## Conclusion
 
 L1 should remain a high-level specification language centered on `type`, `rel`, `spec`, and `fn`, with `quasi` as an embedded auxiliary notation rather than a competing language tier.
 
-Under that design, `trait` and `struct` are useful only if they stay as shallow surface sugar. Likewise, semantic implication between relations should be named `refines`, not described with implementation vocabulary.
+Under that design, `contract` and `struct` are useful only if they stay as shallow surface sugar. Likewise, semantic implication between relations should be named `refines`, function-to-relation linkage should remain `implements`, and type-to-contract adoption should be named `satisfies` or `derives`.
 
 This proposal therefore keeps the readable surface forms while removing the misleading semantics that normally travel with them in other languages.

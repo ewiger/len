@@ -87,9 +87,14 @@ This shows the intended division of labor:
 - `struct` introduces the composite shape
 - `spec` carries additional laws about well-formed instances
 
-## Relation to Traits
+## Relation to Contracts
 
-See `derive.md` for discussion of how `struct` and `trait` can interact.
+`struct` can connect to grouped contracts in two ways:
+
+- `satisfies` declares that the struct adopts a contract explicitly
+- `derives` declares that the contract satisfaction artifacts can be generated canonically from the struct fields
+
+See `derive.md` for discussion of how `struct` and `contract` interact.
 
 ## Validation Expectations
 
@@ -99,6 +104,7 @@ That means validation may need to check:
 
 - duplicate field names
 - field type well-formedness
+- well-formedness of any `satisfies` or `derives` clauses attached to the struct
 - whether later elaboration can generate a consistent lowered representation
 - consistency between a struct declaration and any related field or law declarations
 
