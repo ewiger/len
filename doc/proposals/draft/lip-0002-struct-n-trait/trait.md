@@ -97,7 +97,7 @@ That means validation may need to check:
 - object-oriented inheritance semantics
 - virtual dispatch or method lookup rules
 - implicit receiver binding beyond explicit parameters such as `self`
-- Rust-style `impl` or `implements` semantics
+- Rust-style `impl` blocks or trait-instance semantics
 
 ## Open Questions
 

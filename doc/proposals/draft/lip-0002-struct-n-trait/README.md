@@ -19,12 +19,13 @@ This proposal clarifies how `struct`, `trait`, and relation-level refinement sho
 
 The proposal keeps `type` and `rel` as the true L1 primitives. `spec` remains the general mechanism for arbitrary laws, definitions, and semantic constraints. `fn` remains the executable or constructive form, optionally paired with an embedded `quasi` block for open-ended pseudocode.
 
-Within that model, this proposal makes four design moves:
+Within that model, this proposal makes five design moves:
 
 - add relation-level `refines` syntax sugar
 - remove `impl` from L1
 - keep `trait`, but define it as grouped contract sugar rather than an implementation mechanism
 - keep `struct`, but define it as record sugar rather than a class-like construct
+- add `derives` as a companion to `refines` for generating derived specs
 
 The intent is to make the surface language more readable while keeping the semantics minimal, relational, and high-level.
 
@@ -35,6 +36,7 @@ This proposal is split into focused documents:
 - `README.md`: proposal overview, relation refinement, and migration away from `impl`
 - `trait.md`: detailed design for `trait` as grouped contract sugar
 - `struct.md`: detailed design for `struct` as composite type sugar
+- `derives.md`: detailed design for `derives` as companion to `refines` for generating derived specs
 
 ## Motivation
 
@@ -45,7 +47,7 @@ In `len`, the important relationships are logical and semantic:
 - one relation may refine another relation
 - a collection of relations and functions may be grouped under a named contract
 - a composite value may be described by named fields
-- an executable function may be linked to a relation and may contain a `quasi` sketch
+- an executable function may be linked to a relation and always contains a `quasi` sketch
 
 Those ideas do not require object-oriented classes, Rust-style trait implementations, dispatch rules, or nominal instance machinery. The existing words suggest those semantics even when the language does not intend to provide them.
 
@@ -60,6 +62,8 @@ The language should instead expose the higher-level ideas directly:
 Today the L1 surface has three related issues.
 
 First, the relation between an abstract contract and a more specific relation is described inconsistently. The notion is semantic refinement, but names like `implements` and `impl` imply a programming-language implementation relation.
+
+> Yes, `implements` is still used in `fn` declarations, it is still a great fit for the intended meaning there. A function can be read as implementing a relation, and the `implements` clause can be read as a contract linking the executable form to the abstract relation. See the open question about whether `ensures Relation(...)` should also be allowed as equivalent surface sugar for that purpose. The key point is that `implements` is appropriate for linking a function to a relation as its contract, while `refines` is more appropriate for stating that one relation semantically implies another.
 
 Second, `impl` is both ambiguous and redundant. In a language that already has `spec`, `rel`, and `fn`, `impl` does not introduce a new essential idea. It mainly imports expectations from other languages.
 
@@ -130,6 +134,10 @@ The detailed struct design is specified in `struct.md`. In short:
 - it behaves like a record or named tuple, not a class
 - field syntax stays lightweight as direct `name: Type` entries
 - the semantics remain reducible to `type` plus lower-level relational structure
+
+### 5. Add `derives` as Companion to `refines`
+
+`derive` should be added as a companion to `refines` for generating derived specs from struct fields and trait members.
 
 ## Grammar Sketch
 
@@ -217,39 +225,27 @@ rel BubbleSort(input: Seq, output: Seq) refines Sort(input, output)
 
 The lowered meaning remains the same `spec`-level implication.
 
-### Before / After: Function Contract
+### Example: Canonicalization Contract
 
-Before:
-
-```len
-fn bubble_sort(input: Seq) -> output: Seq
-    implements BubbleSort(input, output)
-    ensures Sorted(output)
-    ensures Permutation(input, output)
-    quasi:
-        let output := input
-        note reorder output until sorted
-        return output
-```
-
-After:
+This proposal keeps relation refinement and function implementation distinct even when they talk about the same domain.
 
 ```len
-rel BubbleSort(input: Seq, output: Seq) refines Sort(input, output)
+rel CanonicalPath(raw: Path, normalized: Path)
+rel SlashNormalizedPath(raw: Path, normalized: Path) refines CanonicalPath(raw, normalized)
 
-fn bubble_sort(input: Seq) -> output: Seq
-    ensures BubbleSort(input, output)
-    ensures Sorted(output)
-    ensures Permutation(input, output)
+fn normalize_slashes(raw: Path) -> normalized: Path
+    implements SlashNormalizedPath(raw, normalized)
     quasi:
-        let output := input
+        let normalized := raw
         ...
-        return output
+        return normalized
 ```
 
-The executable form remains `fn`, and the open-ended algorithm sketch remains inside `quasi`. The abstract semantic relation is still expressed relationally.
+Here the roles stay separate:
 
-Detailed trait and struct examples are provided in the companion documents.
+- `refines` states that `SlashNormalizedPath` semantically implies `CanonicalPath`
+- `implements` states that `normalize_slashes` is the executable form linked to `SlashNormalizedPath`
+- the example does not add an `ensures CanonicalPath(...)` clause because that would be redundant once the implemented relation already refines `CanonicalPath`
 
 ## Rationale
 
@@ -260,6 +256,7 @@ This proposal preserves the existing `len` philosophy.
 Within that architecture:
 
 - `refines` gives the right name for semantic implication between relations
+- `derives` provides a companion mechanism for generating derived specs from struct fields and trait members
 - removing `impl` reduces misleading programming-language baggage
 - `trait` remains available as a readable grouping device without becoming a new semantic tower
 - `struct` remains available as readable data-shape sugar without becoming an OO class
@@ -272,14 +269,15 @@ This proposal changes the preferred surface language and therefore requires migr
 
 - `impl` declarations should be rejected or deprecated in L1 once replacement lowering is implemented
 - relation-level semantics previously described informally through `implements` should move to `refines` or explicit `spec`
-- `fn ... implements ...` clauses remains as is
+- `fn ... implements ...` clauses remain as is
 - existing parsers and validators that recognize `impl` and `implements` do not need a transition strategy - it's MVP
 
 Because current usage is still limited, this is a good point to simplify the vocabulary before those forms become entrenched.
 
 ## Open Questions
 
-1. Should `fn` keep a dedicated relation-linking clause, or is `ensures` alone sufficient once relation refinement is explicit?
+1. Should `fn` keep `implements` as the dedicated relation-linking clause, or should `ensures Relation(...)` also be allowed as equivalent surface sugar? Both are 
+kept, as they do different things: `implements` links the function to a relation as its contract, while `ensures` states a postcondition that may or may not be the same as the contract relation. there is also `requires`, which states a precondition. The contract relation is the primary semantic link, while ensures and requires can express additional constraints. Finally. `fn` also declare a new relation with the same signature as the function, which can be used for further specifications.
 2. Should `refines` accept only relation applications, or any formula whose free variables match the relation signature?
 3. What transition strategy should parsers and validators use while `impl` and older `implements` usage still exists in the repository?
 
