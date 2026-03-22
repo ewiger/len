@@ -29,12 +29,12 @@ spec bubble_sort_correct
 	if len(diags) != 0 {
 		t.Fatalf("Parse returned diagnostics: %#v", diags)
 	}
-	if len(file.Decls) != 4 {
-		t.Fatalf("got %d declarations, want 4", len(file.Decls))
+	if len(file.Decls) != 5 {
+		t.Fatalf("got %d declarations, want 5", len(file.Decls))
 	}
-	fn, ok := file.Decls[2].(*ast.FnDecl)
+	fn, ok := file.Decls[3].(*ast.FnDecl)
 	if !ok {
-		t.Fatalf("third decl = %T, want *ast.FnDecl", file.Decls[2])
+		t.Fatalf("fourth decl = %T, want *ast.FnDecl", file.Decls[3])
 	}
 	if fn.Quasi == nil || fn.Quasi.StyleName != "ProceduralAlgorithm" {
 		t.Fatalf("fn quasi = %#v, want style ProceduralAlgorithm", fn.Quasi)
@@ -42,9 +42,9 @@ spec bubble_sort_correct
 	if len(fn.Quasi.Block.Lines) != 3 {
 		t.Fatalf("quasi lines = %d, want 3", len(fn.Quasi.Block.Lines))
 	}
-	spec, ok := file.Decls[3].(*ast.SpecDecl)
+	spec, ok := file.Decls[4].(*ast.SpecDecl)
 	if !ok {
-		t.Fatalf("fourth decl = %T, want *ast.SpecDecl", file.Decls[3])
+		t.Fatalf("fifth decl = %T, want *ast.SpecDecl", file.Decls[4])
 	}
 	if len(spec.Given) != 2 {
 		t.Fatalf("spec given binders = %d, want 2", len(spec.Given))

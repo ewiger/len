@@ -327,6 +327,7 @@ func (p *parser) parseQuasiClause(header sourceLine) (*ast.QuasiClause, sourceLi
 	}
 	lines := make([]ast.RawQuasiLine, 0)
 	end := header
+	lastContent := header
 	for p.index < len(p.lines) {
 		line := p.lines[p.index]
 		if !line.blank && line.indent < bodyIndent {
@@ -350,12 +351,20 @@ func (p *parser) parseQuasiClause(header sourceLine) (*ast.QuasiClause, sourceLi
 			LineSpan:     lineSpan(p.filePath, line),
 		})
 		end = line
+		lastContent = line
 		p.index++
+	}
+
+	for len(lines) > 0 && lines[len(lines)-1].TrimmedText == "" {
+		lines = lines[:len(lines)-1]
+	}
+	if len(lines) > 0 {
+		end = lastContent
 	}
 
 	blockSpan := lineSpan(p.filePath, header)
 	if len(lines) > 0 {
-		blockSpan = spanFrom(p.filePath, p.lines[p.index-len(lines)], end)
+		blockSpan = diag.Span{Start: lines[0].LineSpan.Start, End: lines[len(lines)-1].LineSpan.End}
 	}
 	clause := &ast.QuasiClause{
 		StyleName:  styleName,

@@ -366,10 +366,7 @@ func parseExprFromTokens(filePath string, tokens []lexer.Token) (ast.Expr, bool)
 
 func (p *binderParser) current() lexer.Token {
 	if p.index >= len(p.tokens) {
-		if len(p.tokens) == 0 {
-			return lexer.Token{Kind: lexer.KindEOF}
-		}
-		return p.tokens[len(p.tokens)-1]
+		return lexer.Token{Kind: lexer.KindEOF}
 	}
 	return p.tokens[p.index]
 }

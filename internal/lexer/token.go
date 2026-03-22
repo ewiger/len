@@ -1,5 +1,4 @@
 package lexer
-package lexer
 
 import "github.com/yy/len/internal/diag"
 
@@ -7,19 +6,19 @@ import "github.com/yy/len/internal/diag"
 type Kind string
 
 const (
-	KindEOF       Kind = "eof"
+	KindEOF        Kind = "eof"
 	KindIdentifier Kind = "identifier"
-	KindKeyword   Kind = "keyword"
-	KindNumber    Kind = "number"
-	KindString    Kind = "string"
-	KindComment   Kind = "comment"
-	KindDocstring Kind = "docstring"
-	KindOperator  Kind = "operator"
-	KindDot       Kind = "."
-	KindColon     Kind = ":"
-	KindComma     Kind = ","
-	KindLParen    Kind = "("
-	KindRParen    Kind = ")"
+	KindKeyword    Kind = "keyword"
+	KindNumber     Kind = "number"
+	KindString     Kind = "string"
+	KindComment    Kind = "comment"
+	KindDocstring  Kind = "docstring"
+	KindOperator   Kind = "operator"
+	KindDot        Kind = "."
+	KindColon      Kind = ":"
+	KindComma      Kind = ","
+	KindLParen     Kind = "("
+	KindRParen     Kind = ")"
 )
 
 // Token is one lexeme plus its source span.

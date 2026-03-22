@@ -1,5 +1,4 @@
 package loader
-package loader
 
 import (
 	"fmt"
