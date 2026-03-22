@@ -7,7 +7,9 @@ spec insertion_sort_correct
         Sorted(output) and Permutation(input, output)
 
 fn insertion_sort(input: Seq) -> output: Seq
-    ensures InsertionSort(input, output)
+    implements InsertionSort(input, output)
+    ensures Sorted(output)
+    ensures Permutation(input, output)
     quasi using style ProceduralAlgorithm:
         let xs := input
         let n := length(xs)

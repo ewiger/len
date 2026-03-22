@@ -7,7 +7,9 @@ spec bubble_sort_correct
         Sorted(output) and Permutation(input, output)
 
 fn bubble_sort(input: Seq) -> output: Seq
-    ensures BubbleSort(input, output)
+    implements BubbleSort(input, output)
+    ensures Sorted(output)
+    ensures Permutation(input, output)
     quasi using style ProceduralAlgorithm:
         let xs := input
         let n := length(xs)

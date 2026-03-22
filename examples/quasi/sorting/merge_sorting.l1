@@ -7,7 +7,9 @@ spec merge_sort_correct
         Sorted(output) and Permutation(input, output)
 
 fn merge_sort(input: Seq) -> output: Seq
-    ensures MergeSort(input, output)
+    implements MergeSort(input, output)
+    ensures Sorted(output)
+    ensures Permutation(input, output)
     quasi using style ProceduralAlgorithm:
         let xs := input
 

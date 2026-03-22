@@ -7,7 +7,9 @@ spec quick_sort_correct
         Sorted(output) and Permutation(input, output)
 
 fn quick_sort(input: Seq) -> output: Seq
-    ensures QuickSort(input, output)
+    implements QuickSort(input, output)
+    ensures Sorted(output)
+    ensures Permutation(input, output)
     quasi using style ProceduralAlgorithm:
         let xs := input
 
