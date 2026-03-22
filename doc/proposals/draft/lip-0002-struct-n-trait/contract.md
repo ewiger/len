@@ -120,6 +120,6 @@ That means validation may need to check:
 
 ## Open Questions
 
-1. Should `contract` permit nested `fn` declarations with `quasi`, or should contracts be restricted to signatures and laws only?
-2. Should `contract` introduce a namespace boundary, or should it elaborate into prefixed top-level names?
-3. Should contract-local names be addressable directly in source-level tooling, or only through their elaborated form?
+1. Should `contract` permit nested `fn` declarations with `quasi`, or should contracts be restricted to signatures and laws only? it does permit nesting of `fn` with `quasi`.
+2. Should `contract` introduce a namespace boundary, or should it elaborate into prefixed top-level names? namespace boundary as Eq.Equal, Eq.eq_reflexive, etc.
+3. Should contract-local names be addressable directly in source-level tooling, or only through their elaborated form? for this we have module visibility rules, so they should be addressable directly within files in the same module (folder), but not from other modules without import.
