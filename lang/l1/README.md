@@ -10,8 +10,6 @@ Core `len.l1` is organized around a contract-centric surface model:
 - **core.math.logic.logic** = the base logical carriers and defining laws for formulas and boolean constants
 - **core.struct** = contract-oriented surface vocabulary for structured data
 
-The current corpus treats `contract` as a central L1 surface form alongside `type`, `rel`, and `spec`. Older vocabulary based on `trait` and `impl` is no longer part of the language corpus.
-
 Then it is extended by various domain-specific libraries, e.g. `core.math.set` for set theory and `core.math.nat` for natural numbers.
 
 ### Syntax 
@@ -25,12 +23,10 @@ Within that reflective layer:
 - syntax aliases are defined explicitly through equality, with `syntax x = y` treated as surface sugar for `x equals y`
 - the named equality target for that sugar is the reflective relation `Equals(x, y)` in `core.syntax.syntax`
 
-### Status of Legacy Surface Forms
+### Surface Forms
 
 The keyword inventory still reserves `fn`, `requires`, `ensures`, and `implements`, but they are not the organizing backbone of the current core corpus.
 
 - `fn` remains available for executable or constructive surface forms
 - `requires` and `ensures` remain available for function-level specification clauses
 - `implements` remains associated with linking a `fn` declaration to a relation when that surface is used
-
-By contrast, `trait`, `impl`, and `note` are not part of the current `len.l1` corpus.
