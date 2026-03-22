@@ -1,0 +1,21 @@
+quasi:
+    if length(xs) <= 1:
+        return xs
+
+    let pivot := xs[length(xs) / 2]
+    let left := []
+    let equal := []
+    let right := []
+
+    for x in xs:
+        if x < pivot:
+            append x to left
+        else if x = pivot:
+            append x to equal
+        else:
+            append x to right
+
+    let sorted_left := quick_sort(left)
+    let sorted_right := quick_sort(right)
+
+    return concat(sorted_left, equal, sorted_right)

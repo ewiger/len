@@ -3,6 +3,7 @@
 # first-class primitives
 keyword type
 keyword rel
+keyword fn
 
 # synatx
 keyword syntax
@@ -18,6 +19,9 @@ keyword from
 keyword spec
 keyword given
 keyword must
+keyword requires
+keyword ensures
+keyword implements
 
 # logical formulas
 keyword forall

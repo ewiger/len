@@ -101,8 +101,8 @@ Tokenize current `len.l1` source with accurate location tracking.
 ### Steps
 
 1. define token kinds for keywords, identifiers, strings, punctuation, operators, comments, and EOF
-2. support reserved words from the current corpus
-3. support multi-character operators such as `=>`, `<=>`, `/\`, and `\/`
+2. support reserved words from the current corpus, including `fn`, declarative spec words such as `given` and `must`, and contract words such as `requires`, `ensures`, and `implements`
+3. support multi-character operators such as `->`, `:=`, `=>`, `<=>`, `/\`, and `\/`
 4. support comments:
    `#` line comments only when `#` starts the line
    `<# ... #>` block comments
@@ -124,10 +124,12 @@ Define a canonical AST for the current parser scope.
 
 ### Steps
 
-1. add top-level declaration nodes for `import`, `type`, `rel`, `const`, `spec`, `syntax`, `trait`, `impl`, `keyword`, `symbol`, and `quasi`
-2. add expression nodes for identifiers, qualified names, applications, equality, infix expressions, unary expressions, quantifiers, and grouped expressions
-3. add explicit nodes for comments and docstrings only if the parser needs to preserve them for tooling
-4. attach spans to major nodes
+1. add top-level declaration nodes for `import`, `type`, `rel`, `fn`, `const`, `spec`, `syntax`, `trait`, `impl`, `keyword`, and `symbol`
+2. extend `fn` nodes with signature information, result binders, contract clauses such as `requires`, `ensures`, and `implements`, and an optional embedded `QUASI_BLOCK` plus optional style metadata for quasi blocks
+3. add quasi statement nodes for line-oriented forms such as `let`, `set`, `choose`, `show`, `return`, `if`, `while`, and `repeat`
+4. add expression nodes for identifiers, qualified names, applications, equality, infix expressions, unary expressions, quantifiers, and grouped expressions
+5. add explicit nodes for comments and docstrings only if the parser needs to preserve them for tooling
+6. attach spans to major nodes
 
 ## Phase 5: Parser
 
@@ -150,11 +152,12 @@ Parse declarations and formulas from the current corpus.
 
 1. parse top-level declarations in source order
 2. parse `spec` with zero or more `given` clauses followed by one `must` clause
-3. parse `syntax` declarations as surface form, binder list, and canonical form
-4. parse `quasi` declarations with nested `case` and optional `when`
-5. implement precedence-based expression parsing
-6. treat comments and docstrings as non-semantic trivia and ignore them during formal parse
-7. add parser tests for every declaration form present in the current corpus
+3. parse `fn` with a signature, optional result binder, contract clauses such as `requires`, `ensures`, and `implements`, and an optional embedded `quasi:` block
+4. parse `syntax` declarations as surface form, binder list, and canonical form
+5. parse embedded `quasi:` bodies as indentation-sensitive `QUASI_BLOCK` regions using a dedicated block routine in the main parser
+6. implement precedence-based expression parsing
+7. treat comments and docstrings as non-semantic trivia and ignore them during formal parse
+8. add parser tests for every declaration form present in the current corpus
 
 ## Phase 6: Loader
 
@@ -192,8 +195,9 @@ Validate semantic well-formedness after parse.
 2. detect duplicate top-level names per namespace
 3. validate relation arity and parameter references
 4. validate binder scope in formulas
-5. validate unresolved references in `syntax` and `quasi`
+5. validate unresolved references in `syntax` and in host expressions embedded inside `quasi`
 6. validate `spec` structure and required `must` clause
+7. validate `fn` structure, including contract clauses, result binders, `return` alignment inside quasi blocks, and style-profile conformance when a quasi style is declared
 
 ## Phase 8: CLI Wiring
 
@@ -257,7 +261,7 @@ type Greeting
 rel Hello(x: Greeting)
 
 spec hello_exists
-    must exists x: Greeting . Hello(x)
+  ensures exists x: Greeting . Hello(x)
 ```
 
 ## Phase 11: Documentation

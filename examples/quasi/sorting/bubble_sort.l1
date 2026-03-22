@@ -1,0 +1,25 @@
+rel BubbleSort(input: Seq, output: Seq)
+
+spec bubble_sort_correct
+    given input: Seq
+    given output: Seq
+    must BubbleSort(input, output) implies
+        Sorted(output) and Permutation(input, output)
+
+fn bubble_sort(input: Seq) -> output: Seq
+    ensures BubbleSort(input, output)
+    quasi:
+        let n := length(xs)
+        let changed := true
+
+        while changed:
+            set changed := false
+
+            for i in 0 .. n - 2:
+                if xs[i] > xs[i + 1]:
+                    let tmp := xs[i]
+                    set xs[i] := xs[i + 1]
+                    set xs[i + 1] := tmp
+                    set changed := true
+
+        return xs

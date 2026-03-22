@@ -14,23 +14,13 @@ spec holds_def
     given f: Formula
     must Holds(ctx, f) iff Eval(ctx, f, True)
 
-quasi Eval
-    case FormulaTrue
-        Eval(ctx, FormulaTrue, True)
-
-    case FormulaFalse
-        Eval(ctx, FormulaFalse, False)
-
-    case not a
-        Eval(ctx, not a, True) when Eval(ctx, a, False)
-        Eval(ctx, not a, False) when Eval(ctx, a, True)
-
-    case a and b
-        Eval(ctx, a and b, True) when Eval(ctx, a, True) and Eval(ctx, b, True)
-        Eval(ctx, a and b, False) when Eval(ctx, a, False)
-        Eval(ctx, a and b, False) when Eval(ctx, b, False)
-
-    case a or b
-        Eval(ctx, a or b, True) when Eval(ctx, a, True)
-        Eval(ctx, a or b, True) when Eval(ctx, b, True)
-        Eval(ctx, a or b, False) when Eval(ctx, a, False) and Eval(ctx, b, False)
+fn eval(ctx: Context, f: Formula) -> b: Bool
+    implements Eval(ctx, f, b)
+    quasi:
+        if f = FormulaTrue:
+            return True
+        if f = FormulaFalse:
+            return False
+        note if f = not a, recursively evaluate a and negate the result
+        note if f = a and b, recursively evaluate both operands and return their conjunction
+        note if f = a or b, recursively evaluate both operands and return their disjunction

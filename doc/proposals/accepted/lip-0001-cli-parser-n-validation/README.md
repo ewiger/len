@@ -79,6 +79,7 @@ The current corpus shows a stable enough MVP surface for a first parser.
 - `import`
 - `type`
 - `rel`
+- `fn`
 - `const`
 - `spec`
 - `syntax`
@@ -86,7 +87,25 @@ The current corpus shows a stable enough MVP surface for a first parser.
 - `impl`
 - `keyword`
 - `symbol`
-- `quasi`
+
+`quasi` is no longer best treated as a top-level declaration form. The preferred design is an embedded `quasi:` block owned by an `fn`.
+
+### Fn Surface
+
+The preferred `fn` direction is function-like:
+
+- parameter list in the header
+- optional result binder after `->`
+- contract clauses such as `requires`, `ensures`, and `implements`
+- optional embedded `quasi:` block for an algorithm sketch or proof-oriented implementation outline
+
+### Spec Surface
+
+`spec` remains declarative rather than algorithmic:
+
+- zero or more `given` clauses
+- one `must` clause
+- no embedded `quasi:` block
 
 ### Formula and Expression Forms
 
