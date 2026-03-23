@@ -1,4 +1,4 @@
-.PHONY: build test clean
+.PHONY: build test docs docs-serve clean
 
 build:
 	mkdir -p bin
@@ -7,5 +7,11 @@ build:
 test:
 	go test ./...
 
+docs:
+	mkdocs build --clean
+
+docs-serve:
+	mkdocs serve
+
 clean:
-	rm -rf bin
+	rm -rf bin doc/lang-html

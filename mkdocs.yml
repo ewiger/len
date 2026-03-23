@@ -1,0 +1,62 @@
+site_name: len Language Docs
+site_description: Reference and tutorials for the len meta-programming language
+repo_url: https://github.com/ewiger/len
+repo_name: ewiger/len
+site_dir: doc/lang-html
+docs_dir: doc/lang
+use_directory_urls: false
+
+theme:
+  name: material
+  language: en
+  font:
+    text: IBM Plex Sans
+    code: IBM Plex Mono
+  palette:
+    - scheme: default
+      primary: teal
+      accent: amber
+  features:
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - navigation.footer
+    - content.action.edit
+    - content.code.copy
+
+edit_uri: edit/main/doc/lang/
+
+plugins:
+  - search
+
+markdown_extensions:
+  - tables
+  - fenced_code
+  - admonition
+  - attr_list
+  - md_in_html
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.superfences
+  - toc:
+      permalink: true
+
+extra_css:
+  - stylesheets/extra.css
+
+nav:
+  - Home: index.md
+  - Concepts: concepts.md
+  - CLI: cli.md
+  - Reference:
+      - Keywords: reference/keywords.md
+      - Syntax: reference/syntax.md
+  - Tutorials:
+      - Hello World: tutorials/01-hello-world.md
+      - Types and Relations: tutorials/02-types-and-relations.md
+      - Writing Specifications: tutorials/03-writing-specifications.md
+      - Functions and Quasi: tutorials/04-functions-and-quasi.md
+      - Contracts and Structs: tutorials/05-contracts-and-structs.md
+      - Coming from Java: tutorials/06-from-java.md
+      - PostgreSQL Schema Generation: tutorials/07-postgres-schema-generation.md
