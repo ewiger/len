@@ -1,6 +1,7 @@
 site_name: len Language Docs
 site_description: Reference and tutorials for the len meta-programming language
 repo_url: https://github.com/ewiger/len
+repo_name: ewiger/len
 site_dir: doc/lang-html
 docs_dir: doc/lang
 use_directory_urls: false
@@ -17,8 +18,13 @@ theme:
       accent: amber
   features:
     - navigation.sections
+    - navigation.expand
     - navigation.top
+    - navigation.footer
+    - content.action.edit
     - content.code.copy
+
+edit_uri: edit/main/doc/lang/
 
 plugins:
   - search
@@ -28,6 +34,11 @@ markdown_extensions:
   - fenced_code
   - admonition
   - attr_list
+  - md_in_html
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.superfences
   - toc:
       permalink: true
 
