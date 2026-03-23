@@ -8,26 +8,23 @@ It is intended for writing programs that generate, transform, or reason about ot
 
 Each layer has a distinct purpose and design focus:
 
-- **Level 0** or `len.l0` remains in natural language and informal pseudo-code. It is intended for high-level design, brainstorming, and communication.
+| Layer | Name | Purpose | Typical contents |
+|------|------|---------|------------------|
+| **L0** | Natural spec | Capture human intent before formalization. | Goals, examples, rationale, edge cases, sketches, informal pseudo-code |
+| **L1** | Structural core | Define the canonical semantic model. | Types, relations, contracts, laws, function obligations, examples |
+| **L2** | Generation contract | Connect the abstract model to concrete output targets. | Package layout, naming rules, AST shapes, runtime choices, error strategy, performance requirements |
 
-- **Level 1** or `len.l1` defines the canonical structural core of len: types, relations, formulas, and syntax-level logical constructs. It is intentionally lightweight and declarative. 
+- **Level 0** or `len.l0` remains in natural language and informal pseudo-code. It is intended for high-level design, brainstorming, communication, and early exploration.
+- **Level 1** or `len.l1` defines the canonical structural core of len: types, relations, formulas, and syntax-level logical constructs. It is intentionally lightweight and declarative.
+- **Level 2** or `len.l2` builds on this core by introducing interpretation, evaluation, and target-aware generation guidance.
 
-- **Level 2** or `len.l2` builds on this core by introducing interpretation and evaluation, such as contexts, satisfaction, and executable semantic rules.
+Taken together, the layers support a specification-first workflow:
 
-L0 / natural spec
-Human-oriented intent, examples, rationale, edge cases.
-
-L1
-Normalized semantic model: types, relations, contracts, laws, function obligations, examples.
-
-L2
-Target-aware generation contract: package layout, naming, error strategy, AST shapes, runtime choices, performance requirements, library use.
-
-LLM generation
-Use L0 + L1 + L2 together.
-
-Validation
-Check the generated code against tests and, where possible, against the L1 obligations.
+1. Write **L0** to clarify intent, examples, and edge cases.
+2. Write **L1** to formalize the model, relations, and laws.
+3. Write **L2** to describe how that model maps into executable systems or generated code.
+4. Use **L0 + L1 + L2** together when driving code generation with LLMs or other tooling.
+5. Validate the generated result against tests and, where possible, against the L1 obligations.
 
 ## the Big Picture
 
@@ -41,13 +38,16 @@ The top down loop is:
 
 However it is also possible to move in both directions and experiment: 
 
-- *verbilize* to enrich previous or next layer
+- *interpret* to impose semantical and relational interpretation on the structures, types, relations
+- *verbalize*  (the opposite of interpret) to enrich previous or next layer
 - *interpolate* to fill in gaps or connect layers
-- *verify* to check consistency and correctness
+- *extrapolate* to generalize and extend the model or generation contracts
+- *verify* to check logical consistency and correctness
 - *iterate* to refine and improve
 - *code generate* to produce executable code
 - *test* to validate functionality
 - *document* to clarify and communicate
+- *evolve* to adapt to new requirements or insights through many experimental pipelines, selection and refinement rounds
 
 This changes the workflow or even the whole software lifecycle from a code-centric one to a specification-first one, where the specification is the primary artifact and the code is generated from it.
 
