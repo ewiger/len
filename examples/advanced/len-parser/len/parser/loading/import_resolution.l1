@@ -1,0 +1,11 @@
+type ModulePath
+type FilePath
+
+rel ImportPath(module: ModulePath, file: FilePath)
+rel Resolves(module: ModulePath, file: FilePath)
+rel MissingImport(module: ModulePath)
+rel ImportCycle(module: ModulePath)
+
+spec resolution_rule
+    given module: ModulePath, file: FilePath
+    must Resolves(module, file) implies ImportPath(module, file)

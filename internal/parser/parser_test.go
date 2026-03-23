@@ -89,6 +89,51 @@ fn bubble_sort(input: Seq) -> output: Seq
 	}
 }
 
+func TestParseStructAndContract(t *testing.T) {
+	source := `type Int
+struct Pair
+    left: Int
+    right: Int
+
+contract Arithmetic(T: Int)
+    rel Add(left: T, right: T, value: T)
+    spec identity
+        given x: T
+        must Add(x, x, x)
+`
+
+	file, diags := parser.Parse("sample.l1", source)
+	if len(diags) != 0 {
+		t.Fatalf("Parse returned diagnostics: %#v", diags)
+	}
+	if len(file.Decls) != 3 {
+		t.Fatalf("got %d declarations, want 3", len(file.Decls))
+	}
+	strct, ok := file.Decls[1].(*ast.StructDecl)
+	if !ok {
+		t.Fatalf("second decl = %T, want *ast.StructDecl", file.Decls[1])
+	}
+	if len(strct.Fields) != 2 {
+		t.Fatalf("struct fields = %d, want 2", len(strct.Fields))
+	}
+	contract, ok := file.Decls[2].(*ast.ContractDecl)
+	if !ok {
+		t.Fatalf("third decl = %T, want *ast.ContractDecl", file.Decls[2])
+	}
+	if len(contract.Params) != 1 {
+		t.Fatalf("contract params = %d, want 1", len(contract.Params))
+	}
+	if len(contract.Members) != 2 {
+		t.Fatalf("contract members = %d, want 2", len(contract.Members))
+	}
+	if _, ok := contract.Members[0].(*ast.RelDecl); !ok {
+		t.Fatalf("first contract member = %T, want *ast.RelDecl", contract.Members[0])
+	}
+	if _, ok := contract.Members[1].(*ast.SpecDecl); !ok {
+		t.Fatalf("second contract member = %T, want *ast.SpecDecl", contract.Members[1])
+	}
+}
+
 func hasDiagCode(diags []diag.Diagnostic, code string) bool {
 	for _, item := range diags {
 		if item.Code == code {

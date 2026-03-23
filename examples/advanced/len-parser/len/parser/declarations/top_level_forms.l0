@@ -1,0 +1,17 @@
+Goal: specify the top-level declaration forms accepted by the current parser.
+
+This module covers the current declaration set:
+- import
+- type
+- rel
+- const
+- keyword
+- symbol
+- trait
+- impl
+- syntax
+- spec
+- fn
+
+This is the implementation-facing declaration surface from
+`internal/parser/declarations.go`.

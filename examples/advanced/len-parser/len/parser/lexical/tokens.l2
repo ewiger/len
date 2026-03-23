@@ -1,0 +1,70 @@
+level len.l2
+module len.parser.lexical.tokens
+
+uses l0 "tokens.l0"
+uses l1 "tokens.l1"
+
+generation profile:
+    purpose: emit the token-kind model and reserved-word table for the Go lexer
+    determinism: high
+    codegen target: go
+    preserve exact names: yes
+    preserve literal values: yes
+    preserve declaration order: yes
+    do not infer extra token kinds: yes
+
+generate with target go:
+    file "internal/lexer/token.go"
+    package lexer
+
+    imports:
+        "github.com/yy/len/internal/diag"
+
+    emit type declaration:
+        type Kind string
+
+    emit const block KindValues in this exact order:
+        KindEOF        Kind = "eof"
+        KindIdentifier Kind = "identifier"
+        KindKeyword    Kind = "keyword"
+        KindNumber     Kind = "number"
+        KindString     Kind = "string"
+        KindComment    Kind = "comment"
+        KindDocstring  Kind = "docstring"
+        KindOperator   Kind = "operator"
+        KindDot        Kind = "."
+        KindColon      Kind = ":"
+        KindComma      Kind = ","
+        KindLParen     Kind = "("
+        KindRParen     Kind = ")"
+
+    emit struct declaration:
+        type Token struct {
+            Kind   Kind
+            Lexeme string
+            Span   diag.Span
+        }
+
+    emit variable declaration:
+        var keywords = map[string]struct{}{
+            "and": {}, "as": {}, "const": {}, "else": {}, "ensures": {},
+            "exists": {}, "false": {}, "fn": {}, "forall": {}, "from": {},
+            "given": {}, "iff": {}, "impl": {}, "implements": {}, "implies": {},
+            "import": {}, "in": {}, "keyword": {}, "must": {}, "not": {},
+            "or": {}, "quasi": {}, "rel": {}, "requires": {}, "spec": {},
+            "struct": {}, "symbol": {}, "syntax": {}, "trait": {}, "true": {},
+            "type": {}, "where": {}, "while": {}, "for": {},
+            "subsetof": {},
+        }
+
+    emit function exactly:
+        func IsKeyword(value string) bool {
+            _, ok := keywords[value]
+            return ok
+        }
+
+    generator notes:
+        - keep the keyword table as a package variable, not a function-local value
+        - keep token literal strings byte-for-byte identical to this spec
+        - do not sort the keywords map alphabetically unless the source spec is also changed
+        - treat the `Kind` string literals as part of the external contract

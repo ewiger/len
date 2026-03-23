@@ -1,0 +1,10 @@
+type ResolutionSeq
+
+rel ResolutionSorted(s: ResolutionSeq)
+rel ResolutionPair(a: ResolutionSeq, b: ResolutionSeq)
+
+fn resolution_same(input: ResolutionSeq) -> output: ResolutionSeq
+    ensures ResolutionSorted(output) or ResolutionPair(input, output)
+    quasi using style ProceduralAlgorithm:
+        let xs := input
+        return xs

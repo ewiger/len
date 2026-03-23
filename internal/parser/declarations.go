@@ -16,6 +16,8 @@ func (p *parser) parseTopLevel() ast.Decl {
 		return p.parseImportDecl(line)
 	case "type":
 		return p.parseTypeDecl(line)
+	case "struct":
+		return p.parseStructDecl(line)
 	case "rel":
 		return p.parseRelDecl(line)
 	case "const":
@@ -32,6 +34,8 @@ func (p *parser) parseTopLevel() ast.Decl {
 		return p.parseSyntaxDecl(line)
 	case "spec":
 		return p.parseSpecDecl(line)
+	case "contract":
+		return p.parseContractDecl(line)
 	case "fn":
 		return p.parseFnDecl(line)
 	default:
@@ -60,6 +64,64 @@ func (p *parser) parseTypeDecl(line sourceLine) ast.Decl {
 		return nil
 	}
 	return &ast.TypeDecl{Name: name, Span: lineSpan(p.filePath, line)}
+}
+
+func (p *parser) parseStructDecl(header sourceLine) ast.Decl {
+	name := trimKeyword(header.trimmed, "struct")
+	if name == "" {
+		p.error(lineSpan(p.filePath, header), "parser.struct.invalid", "struct declaration requires a name")
+		p.index++
+		return nil
+	}
+
+	p.index++
+	decl := &ast.StructDecl{Name: name}
+	bodyIndent, ok := p.hasIndentedBlock(header)
+	if !ok {
+		decl.Span = lineSpan(p.filePath, header)
+		return decl
+	}
+
+	end := header
+	for p.index < len(p.lines) {
+		line := p.lines[p.index]
+		if line.blank {
+			p.index++
+			continue
+		}
+		if line.indent < bodyIndent {
+			break
+		}
+		if line.indent > bodyIndent {
+			p.error(lineSpan(p.filePath, line), "parser.struct.indent", "struct fields must align with the first field")
+			end = line
+			p.index++
+			continue
+		}
+
+		nameText, typeText, ok := splitOnce(line.trimmed, ":")
+		if !ok {
+			p.error(lineSpan(p.filePath, line), "parser.struct.field", "struct field must use `name: Type`")
+			end = line
+			p.index++
+			continue
+		}
+		fieldName := strings.TrimSpace(nameText)
+		if fieldName == "" {
+			p.error(lineSpan(p.filePath, line), "parser.struct.field", "struct field requires a name")
+			end = line
+			p.index++
+			continue
+		}
+		typeExpr, parsed := p.parseInlineExpr(strings.TrimSpace(typeText), diag.Position{File: p.filePath, Line: line.lineNo, Column: line.indent + strings.Index(line.raw, ":") + 2})
+		if parsed {
+			decl.Fields = append(decl.Fields, ast.FieldDecl{Name: fieldName, Type: typeExpr, Span: lineSpan(p.filePath, line)})
+		}
+		end = line
+		p.index++
+	}
+	decl.Span = spanFrom(p.filePath, header, end)
+	return decl
 }
 
 func (p *parser) parseRelDecl(line sourceLine) ast.Decl {
@@ -212,6 +274,82 @@ func (p *parser) parseSpecDecl(header sourceLine) ast.Decl {
 			p.error(lineSpan(p.filePath, line), "parser.spec.clause", "spec body only supports `given` and `must` clauses")
 			end = line
 			p.index++
+		}
+	}
+	decl.Span = spanFrom(p.filePath, header, end)
+	return decl
+}
+
+func (p *parser) parseContractDecl(header sourceLine) ast.Decl {
+	content := trimKeyword(header.trimmed, "contract")
+	name := strings.TrimSpace(content)
+	params := []ast.Binder(nil)
+	if open := strings.Index(content, "("); open >= 0 {
+		close := strings.LastIndex(content, ")")
+		if close < open {
+			p.error(lineSpan(p.filePath, header), "parser.contract.invalid", "contract declaration has an unclosed parameter list")
+			p.index++
+			return nil
+		}
+		name = strings.TrimSpace(content[:open])
+		parsedParams, ok := p.parseBindersText(content[open+1:close], diag.Position{File: p.filePath, Line: header.lineNo, Column: header.indent + open + len("contract ") + 1})
+		if !ok {
+			p.index++
+			return nil
+		}
+		params = parsedParams
+		if strings.TrimSpace(content[close+1:]) != "" {
+			p.error(lineSpan(p.filePath, header), "parser.contract.invalid", "unexpected trailing content after contract parameters")
+		}
+	}
+	if name == "" {
+		p.error(lineSpan(p.filePath, header), "parser.contract.invalid", "contract declaration requires a name")
+		p.index++
+		return nil
+	}
+
+	p.index++
+	bodyIndent, ok := p.expectIndentedBlock(header)
+	decl := &ast.ContractDecl{Name: name, Params: params}
+	if !ok {
+		decl.Span = lineSpan(p.filePath, header)
+		return decl
+	}
+
+	end := header
+	for p.index < len(p.lines) {
+		line := p.lines[p.index]
+		if line.blank {
+			p.index++
+			continue
+		}
+		if line.indent < bodyIndent {
+			break
+		}
+		if line.indent > bodyIndent {
+			p.error(lineSpan(p.filePath, line), "parser.contract.indent", "contract members must align with the first member")
+			end = line
+			p.index++
+			continue
+		}
+
+		var member ast.Decl
+		switch leadingWord(line.trimmed) {
+		case "rel":
+			member = p.parseRelDecl(line)
+		case "spec":
+			member = p.parseSpecDecl(line)
+		case "fn":
+			member = p.parseFnDecl(line)
+		default:
+			p.error(lineSpan(p.filePath, line), "parser.contract.member", "contract body only supports rel, spec, and fn declarations")
+			end = line
+			p.index++
+			continue
+		}
+		if member != nil {
+			decl.Members = append(decl.Members, member)
+			end = spanEndLine(member.GetSpan(), line)
 		}
 	}
 	decl.Span = spanFrom(p.filePath, header, end)
@@ -417,6 +555,17 @@ func (p *parser) expectIndentedBlock(header sourceLine) (int, bool) {
 	}
 	if peek >= len(p.lines) || p.lines[peek].indent <= header.indent {
 		p.error(lineSpan(p.filePath, header), "parser.block.missing", "expected an indented block")
+		return 0, false
+	}
+	return p.lines[peek].indent, true
+}
+
+func (p *parser) hasIndentedBlock(header sourceLine) (int, bool) {
+	peek := p.index
+	for peek < len(p.lines) && p.lines[peek].blank {
+		peek++
+	}
+	if peek >= len(p.lines) || p.lines[peek].indent <= header.indent {
 		return 0, false
 	}
 	return p.lines[peek].indent, true

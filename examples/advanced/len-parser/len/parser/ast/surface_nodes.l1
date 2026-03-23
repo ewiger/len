@@ -1,0 +1,13 @@
+type AstDecl
+type AstExpr
+type AstBinder
+type AstQuasiBlock
+
+rel AstTopLevelDecl(x: AstDecl)
+rel AstExprNode(x: AstExpr)
+rel AstBinderNode(x: AstBinder)
+rel AstRawQuasiBlock(x: AstQuasiBlock)
+
+spec ast_surface_partition
+    given x: AstDecl
+    must AstTopLevelDecl(x)

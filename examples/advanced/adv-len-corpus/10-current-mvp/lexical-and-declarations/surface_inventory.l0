@@ -1,0 +1,12 @@
+Goal: freeze the declaration and lexical surface that the Go parser already
+accepts today.
+
+This module should cover:
+- comments and docstrings as ignored trivia
+- import paths
+- type, rel, const, keyword, symbol, trait, impl, and syntax declarations
+- binder syntax and typed parameter lists
+- dotted names and call-shaped syntax surfaces
+
+This module should not try to cover future grouped declarations such as
+contract or struct. Those belong in later target-l1 folders.

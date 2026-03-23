@@ -1,0 +1,17 @@
+type Type
+type Bool
+
+contract Eq(T: Type)
+    rel Equal(x: T, y: T)
+
+    spec eq_reflexive
+        given x: T
+        must Equal(x, x)
+
+contract SortAlgorithm(T: Type)
+    rel Sort(input: T, output: T)
+
+    fn sort(input: T) -> output: T
+        implements Sort(input, output)
+        quasi:
+            return input

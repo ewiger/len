@@ -1,0 +1,58 @@
+level len.l2
+module calculator
+
+uses l0 "calculator.l0"
+uses l1 "calculator.l1"
+
+generation profile:
+    purpose: emit a small hand-written Go calculator from the len L1/L2 design
+    determinism: high
+    codegen target: go
+    preserve public api names: yes
+    preserve operator precedence: yes
+    preserve error-first flow: yes
+
+generate with target go:
+    file "examples/advanced/calculator/calculator.go"
+    package calculator
+
+    imports:
+        "fmt"
+        "strconv"
+        "unicode"
+
+    emit public api exactly:
+        type Expr interface {
+            isExpr()
+        }
+
+        type IntLit struct {
+            Value int
+        }
+
+        type BinaryExpr struct {
+            Op    string
+            Left  Expr
+            Right Expr
+        }
+
+        func Parse(source string) (Expr, error)
+        func Eval(expr Expr) (int, error)
+        func Calculate(source string) (int, error)
+
+    implementation constraints:
+        - use a private token kind enum plus private token struct
+        - use a private recursive-descent parser struct with tokens and position
+        - parse expression grammar in this order: expr, term, factor
+        - multiplication and division bind tighter than addition and subtraction
+        - parentheses override precedence
+        - lex decimal integer literals only
+        - skip Unicode whitespace with unicode.IsSpace
+        - unknown characters return an error with the rune and position
+        - division by zero returns an error, never panics
+        - unknown AST nodes and unknown operators return errors
+
+    generator notes:
+        - keep the implementation in one file for readability
+        - keep the token stream private to the package
+        - preserve the L0 examples as the basis for table-driven tests

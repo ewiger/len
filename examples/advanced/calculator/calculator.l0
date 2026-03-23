@@ -1,0 +1,25 @@
+module calculator
+
+doc:
+    A small arithmetic calculator language.
+
+goal:
+    Accept expressions over integers with:
+        - literals: 0, 1, 2, ...
+        - binary operators: +, -, *, /
+        - parentheses: ( and )
+
+semantics:
+    - multiplication and division bind tighter than addition and subtraction
+    - parentheses override precedence
+    - evaluation is integer evaluation
+    - division by zero is an error
+    - malformed input is a parse error
+
+examples:
+    "1 + 2 * 3"        => 7
+    "(1 + 2) * 3"      => 9
+    "8 / 2 + 1"        => 5
+    "8 / (2 + 2)"      => 2
+    "1 / 0"            => error
+    "1 + )"            => parse error

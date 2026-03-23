@@ -1,0 +1,13 @@
+type QuasiSeq
+
+rel QuasiSorted(s: QuasiSeq)
+
+fn quasi_normalize(input: QuasiSeq) -> output: QuasiSeq
+    ensures QuasiSorted(output) or output = input
+    quasi using style ProceduralAlgorithm:
+        let xs := input
+        let done := true
+        if done:
+            return xs
+        else:
+            return input

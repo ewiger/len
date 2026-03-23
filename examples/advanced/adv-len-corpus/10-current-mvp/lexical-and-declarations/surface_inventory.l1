@@ -1,0 +1,21 @@
+# line comments are ignored when they start at the beginning of a line
+"single-line docstring"
+
+type Expr
+type Token
+type Name
+
+const EmptyName: Name
+
+keyword choose
+symbol ARROW as "->"
+
+trait Comparable
+impl Token : Comparable
+
+rel Lookup(path: Expr, name: Name)
+rel Declares(token: Token, name: Name)
+rel AliasFor(x: Expr, y: Expr)
+
+syntax x = y where x: Expr, y: Expr implies AliasFor(x, y)
+syntax x in y where x: Expr, y: Expr implies AliasFor(x, y)

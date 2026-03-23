@@ -1,0 +1,31 @@
+keyword type
+keyword rel
+keyword spec
+keyword fn
+keyword syntax
+keyword trait
+keyword impl
+keyword quasi
+
+symbol DOT as "."
+symbol COLON as ":"
+symbol OPEN_PAREN as "("
+symbol CLOSE_PAREN as ")"
+symbol COMMA as ","
+symbol ARROW as "->"
+symbol ASSIGN as ":="
+symbol IMPLIES as "=>"
+symbol IFF as "<=>"
+symbol AND as "/\\"
+symbol OR as "\\/"
+
+type Identifier
+type NumberLiteral
+type StringLiteral
+
+rel Reserved(word: Identifier)
+rel TokenizedAs(word: Identifier, kind: Identifier)
+
+spec keyword_words_are_reserved
+    given word: Identifier, kind: Identifier
+    must Reserved(word) implies TokenizedAs(word, kind)

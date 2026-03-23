@@ -1,0 +1,11 @@
+Goal: specify the current inline expression surface.
+
+This module covers:
+- identifiers
+- qualified names
+- string, number, and boolean literals
+- function and relation application
+- parenthesized groups
+
+The expression parser is used inside syntax, spec, const type expressions, and
+function clauses.

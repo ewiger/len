@@ -1,0 +1,7 @@
+import core.order.contracts
+
+type Real
+
+struct Point derives Ordered(Point)
+    x: Real
+    y: Real

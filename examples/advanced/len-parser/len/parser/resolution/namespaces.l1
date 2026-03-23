@@ -1,0 +1,10 @@
+type Namespace
+type ResolutionName
+
+rel DeclaredIn(name: ResolutionName, space: Namespace)
+rel DuplicateIn(name: ResolutionName, space: Namespace)
+rel DistinctNamespace(left: Namespace, right: Namespace)
+
+spec duplicates_are_namespace_local
+    given name: ResolutionName, space: Namespace
+    must DuplicateIn(name, space) implies DeclaredIn(name, space)

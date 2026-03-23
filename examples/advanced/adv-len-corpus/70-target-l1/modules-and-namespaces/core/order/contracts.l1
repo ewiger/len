@@ -1,0 +1,9 @@
+type Type
+
+contract Ordered(T: Type)
+    rel Leq(x: T, y: T)
+    rel Lt(x: T, y: T)
+
+    spec lt_implies_leq
+        given x, y: T
+        must Lt(x, y) implies Leq(x, y)

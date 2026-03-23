@@ -1,0 +1,21 @@
+type Seq
+type Real
+type Type
+
+rel Sort(input: Seq, output: Seq)
+rel StableSort(input: Seq, output: Seq) refines Sort(input, output)
+
+contract Eq(T: Type)
+    rel Equal(x: T, y: T)
+
+struct Point satisfies Eq(Point)
+    x: Real
+    y: Real
+
+struct Value derives Eq(Value)
+    inner: Real
+
+fn stable_sort(input: Seq) -> output: Seq
+    implements StableSort(input, output)
+    quasi:
+        return input

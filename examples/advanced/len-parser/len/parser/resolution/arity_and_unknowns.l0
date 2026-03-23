@@ -1,0 +1,9 @@
+Goal: specify validator checks for unresolved names and callable arity.
+
+This module reflects the current validator behavior for:
+- unknown names in expressions
+- unknown callable names in applications
+- relation arity mismatch
+- function arity mismatch
+
+This module can later be paired with intentionally failing diagnostic files.

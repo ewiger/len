@@ -1,0 +1,18 @@
+# line comment at beginning of line is ignored
+"standalone docstring is ignored"
+
+type Trivia
+type CommentTrivia
+type DocstringTrivia
+
+rel IgnoredByParser(x: Trivia)
+rel Comment(x: CommentTrivia)
+rel Docstring(x: DocstringTrivia)
+
+spec comments_are_ignored
+    given x: CommentTrivia
+    must Comment(x) implies IgnoredByParser(x)
+
+spec docstrings_are_ignored
+    given x: DocstringTrivia
+    must Docstring(x) implies IgnoredByParser(x)

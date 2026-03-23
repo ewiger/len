@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/yy/len/internal/config"
 	"github.com/yy/len/internal/diag"
 	"github.com/yy/len/internal/loader"
 	"github.com/yy/len/internal/validator"
@@ -22,10 +23,47 @@ func main() {
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(2)
 		}
+	case "config":
+		if err := runConfig(os.Args[2:]); err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			os.Exit(2)
+		}
 	default:
 		printUsage()
 		os.Exit(2)
 	}
+}
+
+func runConfig(args []string) error {
+	if len(args) == 0 {
+		return fmt.Errorf("config requires a subcommand")
+	}
+	switch args[0] {
+	case "init":
+		return runConfigInit(args[1:])
+	default:
+		return fmt.Errorf("unknown config subcommand %q", args[0])
+	}
+}
+
+func runConfigInit(args []string) error {
+	if len(args) != 0 {
+		return fmt.Errorf("config init does not accept positional arguments")
+	}
+	dir, err := config.ResolveDir()
+	if err != nil {
+		return err
+	}
+	bootstrapped, err := config.InitDir(dir)
+	if err != nil {
+		return err
+	}
+	if bootstrapped {
+		fmt.Fprintf(os.Stdout, "initialized LEN config in %s\n", dir)
+		return nil
+	}
+	fmt.Fprintf(os.Stdout, "LEN config already present in %s\n", dir)
+	return nil
 }
 
 func runValidate(args []string) error {
@@ -40,10 +78,14 @@ func runValidate(args []string) error {
 	if err != nil {
 		return err
 	}
+	settings, err := config.Resolve()
+	if err != nil {
+		return err
+	}
 	program := loader.Loader{Root: cwd}.LoadPaths(paths)
 	diagnostics := validator.Validator{
-		ProfileDir:        filepath.Join(cwd, "doc", "proposals", "accepted", "lip-0001-cli-parser-n-validation"),
-		DefaultQuasiStyle: "ProceduralAlgorithm",
+		ProfileDir:        settings.ProfileDir,
+		DefaultQuasiStyle: settings.DefaultQuasiStyle,
 	}.Validate(program)
 	printDiagnostics(diagnostics)
 	if hasErrors(diagnostics) {
@@ -99,4 +141,5 @@ func hasErrors(items []diag.Diagnostic) bool {
 
 func printUsage() {
 	fmt.Fprintln(os.Stderr, "usage: len-cli validate <path-or-directory> [more paths]")
+	fmt.Fprintln(os.Stderr, "       len-cli config init")
 }

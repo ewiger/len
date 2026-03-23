@@ -1,0 +1,10 @@
+Goal: specify the grouped contract surface that the docs and proposals describe
+but the current Go parser does not yet accept.
+
+This module should establish that:
+- contract is an explicit top-level declaration
+- a contract body may contain rel, spec, and fn members
+- nested fn declarations may still own quasi blocks
+- contract syntax is parser-visible surface structure, not only a later lowering
+
+This file is a design target rather than a current acceptance test.

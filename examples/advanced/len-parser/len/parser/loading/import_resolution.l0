@@ -1,0 +1,10 @@
+Goal: describe the current loader behavior.
+
+This module records that the loader:
+- resolves `import a.b.c` to `lang/l1/a/b/c.l1` under the loader root
+- loads imports transitively
+- reports missing imports
+- reports import cycles
+
+This module is primarily descriptive because the current loader resolves only
+from `lang/l1/**`, not from `examples/advanced/**`.

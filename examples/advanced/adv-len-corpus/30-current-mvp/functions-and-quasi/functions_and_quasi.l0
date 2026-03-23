@@ -1,0 +1,12 @@
+Goal: pin down the current accepted function surface.
+
+This module should show:
+- fn headers with parameter binders and result binders
+- requires, ensures, and implements clauses
+- a required quasi block
+- the current procedural quasi style with let, set, append, return, if, else,
+  while, and for
+
+The host parser should stay shallow here. The fn body owns the quasi block, but
+the quasi block contents are style-validated rather than parsed into a full host
+statement AST.

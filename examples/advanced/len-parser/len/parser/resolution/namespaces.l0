@@ -1,0 +1,13 @@
+Goal: specify declaration-namespace rules from the validator symbol table.
+
+This module records that declaration lookup is partitioned by namespace:
+- type
+- rel
+- fn
+- const
+- trait
+- keyword
+- symbol
+- spec
+
+Duplicate detection applies inside a namespace rather than across all names.

@@ -154,6 +154,23 @@ func spanFrom(filePath string, start sourceLine, end sourceLine) diag.Span {
 	}
 }
 
+func spanEndLine(span diag.Span, fallback sourceLine) sourceLine {
+	line := fallback
+	if span.End.Line > 0 {
+		line.lineNo = span.End.Line
+		line.indent = 0
+		line.raw = strings.Repeat(" ", max(span.End.Column-1, 0))
+	}
+	return line
+}
+
+func max(a int, b int) int {
+	if a > b {
+		return a
+	}
+	return b
+}
+
 func trimKeyword(text string, keyword string) string {
 	return strings.TrimSpace(strings.TrimPrefix(text, keyword))
 }

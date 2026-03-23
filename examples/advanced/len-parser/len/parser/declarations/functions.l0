@@ -1,0 +1,10 @@
+Goal: specify the current function declaration surface.
+
+This module records that the current parser accepts:
+- fn header with parameters
+- optional result binder after ->
+- requires, ensures, and implements clauses
+- a required quasi clause as the final function-body clause
+
+The host parser captures the quasi block as raw lines and leaves style-level
+validation to the quasi subsystem.

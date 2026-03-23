@@ -1,0 +1,12 @@
+Goal: specify the token categories and reserved-word behavior implemented by the
+current lexer.
+
+This module covers:
+- identifiers and reserved keywords
+- punctuation and operator tokens
+- numeric and string literals
+- the distinction between lexical recognition and later parsing
+
+The current implementation recognizes a keyword inventory that includes parser
+forms such as type, rel, spec, fn, syntax, trait, impl, and quasi, plus formula
+words such as forall, exists, and, or, not, iff, in, and subsetof.

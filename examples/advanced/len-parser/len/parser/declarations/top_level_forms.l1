@@ -1,0 +1,21 @@
+type DeclTypeExpr
+type DeclName
+
+type DeclNode
+rel DeclaresName(name: DeclName)
+const EmptyDeclExpr: DeclTypeExpr
+keyword where
+symbol EQUALS as "="
+trait ParsableDecl
+impl DeclNode : ParsableDecl
+syntax x = y where x: DeclTypeExpr, y: DeclTypeExpr implies DeclaresName(x)
+
+spec declaration_shape
+    given name: DeclName
+    must DeclaresName(name)
+
+fn declare_name(name: DeclName) -> result: DeclName
+    ensures DeclaresName(result)
+    quasi using style ProceduralAlgorithm:
+        let out := name
+        return out

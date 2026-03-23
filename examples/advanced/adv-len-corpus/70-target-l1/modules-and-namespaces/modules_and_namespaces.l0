@@ -1,0 +1,13 @@
+Goal: specify the module hierarchy that a broader len.l1 parser and loader will
+eventually need to support.
+
+Expected shape:
+- folder paths map to module paths
+- dotted imports map to nested folders
+- contract declarations stay namespaced within their defining modules
+- future local example corpora should be loadable as multi-file module trees,
+  not only as isolated single-file samples
+
+The sample files in this folder are intentionally ahead of the current loader.
+Today the loader resolves imports from lang/l1 only. This subtree exists to make
+the intended future import and namespace surface concrete.

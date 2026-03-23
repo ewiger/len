@@ -36,6 +36,23 @@ type TypeDecl struct {
 func (d *TypeDecl) declNode()          {}
 func (d *TypeDecl) GetSpan() diag.Span { return d.Span }
 
+// StructDecl models `struct Name` with a record-like field block.
+type StructDecl struct {
+	Name   string
+	Fields []FieldDecl
+	Span   diag.Span
+}
+
+func (d *StructDecl) declNode()          {}
+func (d *StructDecl) GetSpan() diag.Span { return d.Span }
+
+// FieldDecl models one struct field declaration.
+type FieldDecl struct {
+	Name string
+	Type Expr
+	Span diag.Span
+}
+
 // RelDecl models `rel Name(params...)`.
 type RelDecl struct {
 	Name   string
@@ -116,6 +133,17 @@ type SpecDecl struct {
 
 func (d *SpecDecl) declNode()          {}
 func (d *SpecDecl) GetSpan() diag.Span { return d.Span }
+
+// ContractDecl models a grouped contract declaration with nested members.
+type ContractDecl struct {
+	Name    string
+	Params  []Binder
+	Members []Decl
+	Span    diag.Span
+}
+
+func (d *ContractDecl) declNode()          {}
+func (d *ContractDecl) GetSpan() diag.Span { return d.Span }
 
 // FnDecl models a function-like declaration with a required quasi body.
 type FnDecl struct {

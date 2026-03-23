@@ -47,6 +47,51 @@ func TestValidatorReportsDuplicateBindersAndQuasiIssues(t *testing.T) {
 	assertCodes(t, diags, "quasi.continuation.orphan", "validator.binder.duplicate", "validator.name.unresolved")
 }
 
+func TestValidatorSupportsStructConstructorsAndContractMembers(t *testing.T) {
+	root := t.TempDir()
+	writeProceduralProfile(t, root)
+	path := filepath.Join(root, "sample.l1")
+	mustWrite(t, path, `type Int
+struct Pair
+    left: Int
+    right: Int
+
+contract Arithmetic(T: Int)
+    rel Combine(left: T, right: T, value: T)
+    spec combine_id
+        given value: T
+        must Combine(value, value, value)
+
+spec uses_contract_and_struct
+    given value: Int
+    must Combine(value, value, Pair(value, value)) = Pair(value, value)
+`)
+
+	program := loader.Loader{Root: root}.LoadPaths([]string{path})
+	diags := validator.Validator{ProfileDir: filepath.Join(root, "doc", "proposals", "accepted", "lip-0001-cli-parser-n-validation")}.Validate(program)
+	if len(diags) != 0 {
+		t.Fatalf("Validate returned diagnostics: %#v", diags)
+	}
+}
+
+func TestValidatorReportsStructIssues(t *testing.T) {
+	root := t.TempDir()
+	writeProceduralProfile(t, root)
+	path := filepath.Join(root, "sample.l1")
+	mustWrite(t, path, `type Int
+struct Pair
+    left: Int
+    left: Missing
+
+spec bad
+    must Pair(1) = Pair(1, 2)
+`)
+
+	program := loader.Loader{Root: root}.LoadPaths([]string{path})
+	diags := validator.Validator{ProfileDir: filepath.Join(root, "doc", "proposals", "accepted", "lip-0001-cli-parser-n-validation")}.Validate(program)
+	assertCodes(t, diags, "validator.field.duplicate", "validator.type.unresolved", "validator.arity.struct")
+}
+
 func assertCodes(t *testing.T, diags []diag.Diagnostic, want ...string) {
 	t.Helper()
 	seen := map[string]bool{}
