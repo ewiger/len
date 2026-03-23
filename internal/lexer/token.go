@@ -30,6 +30,7 @@ type Token struct {
 
 var keywords = map[string]struct{}{
 	"and": {}, "as": {}, "const": {}, "else": {}, "ensures": {},
+	"contract": {},
 	"exists": {}, "false": {}, "fn": {}, "forall": {}, "from": {},
 	"given": {}, "iff": {}, "impl": {}, "implements": {}, "implies": {},
 	"import": {}, "in": {}, "keyword": {}, "must": {}, "not": {},

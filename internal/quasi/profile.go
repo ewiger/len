@@ -132,7 +132,7 @@ func LoadProfile(path string) (Profile, error) {
 func (p *Profile) RulesForKeyword(keyword string) []Rule {
 	matches := make([]Rule, 0, len(p.Rules))
 	for _, rule := range p.Rules {
-		if rule.Keyword == keyword {
+		if rule.Keyword == keyword || rule.Keyword == "*" {
 			matches = append(matches, rule)
 		}
 	}

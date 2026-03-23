@@ -1,5 +1,3 @@
-module calculator
-
 type String
 type Int
 type Bool

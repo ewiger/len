@@ -213,6 +213,16 @@ func leadingKeyword(line string) string {
 		return "else"
 	}
 
+	for i, r := range line {
+		if (r >= 'A' && r <= 'Z') || (r >= 'a' && r <= 'z') || (r >= '0' && r <= '9' && i > 0) || r == '_' {
+			continue
+		}
+		if i == 0 {
+			break
+		}
+		return line[:i]
+	}
+
 	parts := strings.Fields(line)
 	if len(parts) == 0 {
 		return ""

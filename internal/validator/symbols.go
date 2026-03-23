@@ -6,6 +6,7 @@ type namespace string
 
 const (
 	namespaceType    namespace = "type"
+	namespaceContract namespace = "contract"
 	namespaceRel     namespace = "rel"
 	namespaceFn      namespace = "fn"
 	namespaceConst   namespace = "const"

@@ -23,6 +23,8 @@ keywords:
     - if
     - while
     - for
+    - fn
+    - case
   blockContinuations:
     - else
     - else if
@@ -30,6 +32,8 @@ keywords:
     - let
     - set
     - append
+    - expect
+    - fail
     - return
 
 slots:
@@ -43,6 +47,8 @@ slots:
     pattern: '.+'
   collection:
     pattern: '.+'
+  params:
+    pattern: '.*'
 
 rules:
   - id: let-assign
@@ -77,6 +83,28 @@ rules:
     captures:
       expr: expr
       target: target
+
+  - id: append-call
+    kind: statement
+    keyword: append
+    pattern: '^append\((?P<target>[^,]+),\s*(?P<expr>.+)\)$'
+    captures:
+      expr: expr
+      target: target
+
+  - id: expect-call
+    kind: statement
+    keyword: expect
+    pattern: '^expect\((?P<expr>.+)\)$'
+    captures:
+      expr: expr
+
+  - id: fail-expr
+    kind: statement
+    keyword: fail
+    pattern: '^fail\s+(?P<expr>.+)$'
+    captures:
+      expr: expr
 
   - id: return-expr
     kind: statement
@@ -135,6 +163,32 @@ rules:
     captures:
       name: identifier
       expr: expr
+    opensBlock: true
+    childPolicy: any
+
+  - id: local-fn-block
+    kind: block
+    keyword: fn
+    pattern: '^fn\s+(?P<name>[A-Za-z_][A-Za-z0-9_]*)\s*\((?P<params>.*)\):$'
+    captures:
+      name: identifier
+      params: params
+    opensBlock: true
+    childPolicy: any
+
+  - id: case-block
+    kind: block
+    keyword: case
+    pattern: '^case\s+(?P<expr>.+)\s+of$'
+    captures:
+      expr: expr
+    opensBlock: true
+    childPolicy: any
+
+  - id: pattern-arm-block
+    kind: block
+    keyword: '*'
+    pattern: '^[A-Za-z_][A-Za-z0-9_]*\(.*\):$'
     opensBlock: true
     childPolicy: any
 
