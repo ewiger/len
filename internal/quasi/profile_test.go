@@ -83,27 +83,27 @@ func writeFile(t *testing.T, path string, content string) {
 }
 
 func TestProceduralAlgorithmProfileAcceptsCalculatorForms(t *testing.T) {
-  profile, err := quasi.LoadProfile(filepath.Join("..", "..", "doc", "proposals", "accepted", "lip-0001-cli-parser-n-validation", "procedural-algorithm.quasi-style.yaml"))
-  if err != nil {
-    t.Fatalf("LoadProfile returned error: %v", err)
-  }
+	profile, err := quasi.LoadProfile(filepath.Join("..", "..", "doc", "proposals", "accepted", "lip-0001-cli-parser-n-validation", "procedural-algorithm.quasi-style.yaml"))
+	if err != nil {
+		t.Fatalf("LoadProfile returned error: %v", err)
+	}
 
-  result := quasi.Validator{Profile: profile}.Validate(quasi.Block{Lines: []quasi.RawLine{
-    {TrimmedText: "let out := []", IndentColumn: 8},
-    {TrimmedText: "append(out, token(\"int\", slice(source, start, i)))", IndentColumn: 8},
-    {TrimmedText: "fn parse_factor():", IndentColumn: 8},
-    {TrimmedText: "if tokens[pos].kind = \"int\":", IndentColumn: 12},
-    {TrimmedText: "return IntLit(n)", IndentColumn: 16},
-    {TrimmedText: "else:", IndentColumn: 12},
-    {TrimmedText: "fail ParseError(\"expected literal or '('\")", IndentColumn: 16},
-    {TrimmedText: "case expr of", IndentColumn: 8},
-    {TrimmedText: "IntLit(n):", IndentColumn: 12},
-    {TrimmedText: "return n", IndentColumn: 16},
-    {TrimmedText: "BinaryExpr(\"+\", left, right):", IndentColumn: 12},
-    {TrimmedText: "return eval(left) + eval(right)", IndentColumn: 16},
-    {TrimmedText: "expect(tokens[pos], \")\")", IndentColumn: 8},
-  }})
-  if !result.OK() {
-    t.Fatalf("Validate returned diagnostics: %#v", result.Diagnostics)
-  }
+	result := quasi.Validator{Profile: profile}.Validate(quasi.Block{Lines: []quasi.RawLine{
+		{TrimmedText: "let out := []", IndentColumn: 8},
+		{TrimmedText: "append(out, token(\"int\", slice(source, start, i)))", IndentColumn: 8},
+		{TrimmedText: "fn parse_factor():", IndentColumn: 8},
+		{TrimmedText: "if tokens[pos].kind = \"int\":", IndentColumn: 12},
+		{TrimmedText: "return IntLit(n)", IndentColumn: 16},
+		{TrimmedText: "else:", IndentColumn: 12},
+		{TrimmedText: "fail ParseError(\"expected literal or '('\")", IndentColumn: 16},
+		{TrimmedText: "case expr of", IndentColumn: 8},
+		{TrimmedText: "IntLit(n):", IndentColumn: 12},
+		{TrimmedText: "return n", IndentColumn: 16},
+		{TrimmedText: "BinaryExpr(\"+\", left, right):", IndentColumn: 12},
+		{TrimmedText: "return eval(left) + eval(right)", IndentColumn: 16},
+		{TrimmedText: "expect(tokens[pos], \")\")", IndentColumn: 8},
+	}})
+	if !result.OK() {
+		t.Fatalf("Validate returned diagnostics: %#v", result.Diagnostics)
+	}
 }

@@ -5,15 +5,15 @@ import "github.com/yy/len/internal/ast"
 type namespace string
 
 const (
-	namespaceType    namespace = "type"
+	namespaceType     namespace = "type"
 	namespaceContract namespace = "contract"
-	namespaceRel     namespace = "rel"
-	namespaceFn      namespace = "fn"
-	namespaceConst   namespace = "const"
-	namespaceTrait   namespace = "trait"
-	namespaceKeyword namespace = "keyword"
-	namespaceSymbol  namespace = "symbol"
-	namespaceSpec    namespace = "spec"
+	namespaceRel      namespace = "rel"
+	namespaceFn       namespace = "fn"
+	namespaceConst    namespace = "const"
+	namespaceTrait    namespace = "trait"
+	namespaceKeyword  namespace = "keyword"
+	namespaceSymbol   namespace = "symbol"
+	namespaceSpec     namespace = "spec"
 )
 
 type symbol struct {
