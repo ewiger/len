@@ -4,20 +4,86 @@
 
 It is intended for writing programs that generate, transform, or reason about other programs and code structures.
 
-## Status
+## Language Layers
 
-This project is **early-stage and experimental**.
-
-- Expect breaking changes to syntax, semantics, and tooling.
-- The core language and features are still being designed and implemented but you can check out `lang/l1/**`.
-
-## Layers
+Each layer has a distinct purpose and design focus:
 
 - **Level 0** or `len.l0` remains in natural language and informal pseudo-code. It is intended for high-level design, brainstorming, and communication.
 
 - **Level 1** or `len.l1` defines the canonical structural core of len: types, relations, formulas, and syntax-level logical constructs. It is intentionally lightweight and declarative. 
 
 - **Level 2** or `len.l2` builds on this core by introducing interpretation and evaluation, such as contexts, satisfaction, and executable semantic rules.
+
+L0 / natural spec
+Human-oriented intent, examples, rationale, edge cases.
+
+L1
+Normalized semantic model: types, relations, contracts, laws, function obligations, examples.
+
+L2
+Target-aware generation contract: package layout, naming, error strategy, AST shapes, runtime choices, performance requirements, library use.
+
+LLM generation
+Use L0 + L1 + L2 together.
+
+Validation
+Check the generated code against tests and, where possible, against the L1 obligations.
+
+## the Big Picture
+
+The top down loop is:
+
+1. Write L0 design notes and examples to clarify intent and edge cases.
+2. Write L1 declarations to capture the core model, relations, and laws.
+3. Write L2 generation contracts to connect the abstract model to concrete code structures.
+4. Use LLMs to generate code from the L2 contracts, guided by the L1 model and L0 intent.
+5. Validate the generated code against tests and, where possible, against the L1 obligations.
+
+However it is also possible to move in both directions and experiment: 
+
+- *verbilize* to enrich previous or next layer
+- *interpolate* to fill in gaps or connect layers
+- *verify* to check consistency and correctness
+- *iterate* to refine and improve
+- *code generate* to produce executable code
+- *test* to validate functionality
+- *document* to clarify and communicate
+
+This changes the workflow or even the whole software lifecycle from a code-centric one to a specification-first one, where the specification is the primary artifact and the code is generated from it.
+
+## Status
+
+> This project is **early-stage and experimental**.
+
+| Area | Status | Notes |
+|------|--------|-------|
+| Project | ![Experimental](https://img.shields.io/badge/status-experimental-orange) | Expect breaking changes to syntax, semantics, and tooling. |
+| L0 | ![Exploratory](https://img.shields.io/badge/L0-exploratory-lightgrey) | Natural-language design space for intent, rationale, and examples. |
+| L1 | ![Most stable](https://img.shields.io/badge/L1-most%20stable-brightgreen) | The most complete and stable layer today. |
+| L2 | ![In progress](https://img.shields.io/badge/L2-in%20progress-blue) | Actively being designed and implemented; not yet usable. |
+| CLI | ![MVP](https://img.shields.io/badge/cli-validator%20mvp-teal) | Go implementation validates `.l1` files structurally. |
+| Docs | ![GitHub Pages](https://img.shields.io/badge/docs-GitHub%20Pages-6f42c1) | Static site generated with MkDocs and deployed with GitHub Actions. |
+
+- Expect breaking changes to syntax, semantics, and tooling.
+- Level 0 is natural language and is not expected to have a formal syntax or semantics, but the design may evolve as we explore how to best support informal design and communication.
+- Level 1 is the most complete and stable layer.
+- Level 2 is actively being designed and implemented, but it is not yet in a usable state.
+- The CLI has an MVP Go implementation that can structurally validate `.l1` files, but it does not yet execute code, interpret formulas, or perform proof checking.
+
+# Documentation
+
+Language is still being designed and implemented, but given that this is a meta-programming language, the documentation it can be productive for code generation already now. 
+
+Documentation is available in three forms:
+
+- Published website: [ewiger.github.io/len](https://ewiger.github.io/len/)
+- Docs source in this repository: [doc/lang/index.md](doc/lang/index.md)
+- Generated static site output: [doc/lang-html](doc/lang-html)
+
+The website is generated from `doc/lang/**` with MkDocs and deployed as static GitHub Pages via GitHub Actions.
+
+For a quick start, check out the [concepts guide](doc/lang/concepts.md) and the [Hello World tutorial](doc/lang/tutorials/01-hello-world.md).
+
 
 ## Developer
 
