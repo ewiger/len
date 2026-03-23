@@ -1,0 +1,142 @@
+module calculator
+
+type String
+type Int
+type Bool
+
+struct Token
+    kind: String
+    text: String
+
+struct ParseError
+    message: String
+
+struct EvalError
+    message: String
+
+struct Expr
+
+struct IntLit
+    value: Int
+
+struct BinaryExpr
+    op: String
+    left: Expr
+    right: Expr
+
+contract CalculatorLanguage
+    rel ExprText(source: String)
+    rel TokenStream(source: String, tokens: Token)
+    rel Parsed(source: String, expr: Expr)
+    rel Eval(expr: Expr, value: Int)
+    rel ParseFailure(source: String, err: ParseError)
+    rel EvalFailure(expr: Expr, err: EvalError)
+
+    spec precedence_mul_over_add
+        given a, b, c: Int
+        must Eval(BinaryExpr("+", IntLit(a), BinaryExpr("*", IntLit(b), IntLit(c))), a + (b * c))
+
+    spec div_by_zero_fails
+        given x: Int
+        must EvalFailure(BinaryExpr("/", IntLit(x), IntLit(0)), EvalError("division by zero"))
+
+rel TermExpr(expr: Expr)
+rel FactorExpr(expr: Expr)
+
+rel Calculate(source: String, value: Int)
+rel CalculateFailure(source: String, err: String)
+
+spec calculate_def
+    given source: String
+    given value: Int
+    must Calculate(source, value) iff
+        exists expr: Expr .
+            Parsed(source, expr) and Eval(expr, value)
+
+fn lex(source: String) -> tokens: Token
+    implements TokenStream(source, tokens)
+    quasi using style ProceduralAlgorithm:
+        let i := 0
+        let out := []
+        while i < length(source):
+            if is_space(source[i]):
+                set i := i + 1
+            else if is_digit(source[i]):
+                let start := i
+                while i < length(source) and is_digit(source[i]):
+                    set i := i + 1
+                append(out, token("int", slice(source, start, i)))
+            else if source[i] in "+-*/()":
+                append(out, token("sym", char(source[i])))
+                set i := i + 1
+            else:
+                append(out, token("invalid", char(source[i])))
+                set i := i + 1
+        return out
+
+fn parse(source: String) -> expr: Expr
+    implements Parsed(source, expr)
+    quasi using style ProceduralAlgorithm:
+        let tokens := lex(source)
+        let pos := 0
+
+        fn parse_expr():
+            let left := parse_term()
+            while pos < length(tokens) and (tokens[pos] = "+" or tokens[pos] = "-"):
+                let op := tokens[pos]
+                set pos := pos + 1
+                let right := parse_term()
+                set left := BinaryExpr(op, left, right)
+            return left
+
+        fn parse_term():
+            let left := parse_factor()
+            while pos < length(tokens) and (tokens[pos] = "*" or tokens[pos] = "/"):
+                let op := tokens[pos]
+                set pos := pos + 1
+                let right := parse_factor()
+                set left := BinaryExpr(op, left, right)
+            return left
+
+        fn parse_factor():
+            if tokens[pos].kind = "int":
+                let n := to_int(tokens[pos].text)
+                set pos := pos + 1
+                return IntLit(n)
+            else if tokens[pos] = "(":
+                set pos := pos + 1
+                let inner := parse_expr()
+                expect(tokens[pos], ")")
+                set pos := pos + 1
+                return inner
+            else:
+                fail ParseError("expected literal or '('")
+
+        let result := parse_expr()
+        if pos != length(tokens):
+            fail ParseError("unexpected trailing input")
+        return result
+
+fn eval(expr: Expr) -> value: Int
+    implements Eval(expr, value)
+    quasi using style ProceduralAlgorithm:
+        case expr of
+            IntLit(n):
+                return n
+            BinaryExpr("+", left, right):
+                return eval(left) + eval(right)
+            BinaryExpr("-", left, right):
+                return eval(left) - eval(right)
+            BinaryExpr("*", left, right):
+                return eval(left) * eval(right)
+            BinaryExpr("/", left, right):
+                let denom := eval(right)
+                if denom = 0:
+                    fail EvalError("division by zero")
+                return eval(left) / denom
+
+fn calculate(source: String) -> value: Int
+    implements Calculate(source, value)
+    quasi using style ProceduralAlgorithm:
+        let expr := parse(source)
+        return eval(expr)
