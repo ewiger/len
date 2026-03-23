@@ -1,0 +1,8 @@
+# LEN user configuration
+
+# Default quasi style used when a quasi block omits `using style ...`.
+default_quasi_style = "ProceduralAlgorithm"
+
+# Directory, relative to LEN_CONFIG_DIR unless absolute, that contains
+# `*.quasi-style.yaml` files.
+style_dir = "styles"
