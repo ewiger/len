@@ -4,6 +4,27 @@
 
 It is intended for writing programs that generate, transform, or reason about other programs and code structures.
 
+📖 **[Documentation →  ewiger.github.io/len](https://ewiger.github.io/len/)**
+
+## Hello World
+
+```len
+type String
+rel Hello(output: String)
+
+fn hello() -> output: String
+    ensures Hello(output)
+    quasi using style ProceduralAlgorithm:
+        let greeting := "Hello, world!"
+        return greeting
+```
+
+Validate it with the CLI:
+
+```bash
+go run ./cmd/len-cli validate examples/basic/helloworld/hello.l1
+```
+
 ## Language Layers
 
 Each layer has a distinct purpose and design focus:
@@ -134,7 +155,7 @@ The workflow in `.github/workflows/docs-pages.yml` will build the site from `doc
 Run the validator on the hello world example:
 
 ```bash
-go run ./cmd/len-cli validate examples/helloworld/hello.l1
+go run ./cmd/len-cli validate examples/basic/helloworld/hello.l1
 ```
 
 Current scope limits:
